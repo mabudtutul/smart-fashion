@@ -1,0 +1,177 @@
+{
+  "admin": {
+    "nav": {
+      "products": "পণ্যসমূহ",
+      "orders": "অর্ডারসমূহ",
+      "categories": "ক্যাটাগরি",
+      "users": "ব্যবহারকারী",
+      "settings": "সেটিংস",
+      "dashboard": "ড্যাশবোর্ড"
+    },
+    "products": {
+      "add": "পণ্য যোগ করুন",
+      "edit": "পণ্য সম্পাদনা করুন",
+      "delete": "পণ্য মুছুন",
+      "name": "পণ্যের নাম",
+      "description": "বিবরণ",
+      "price": "মূল্য",
+      "stock": "স্টক",
+      "category": "ক্যাটাগরি",
+      "image": "ছবি",
+      "featured": "ফিচারড",
+      "bestseller": "বেস্টসেলার",
+      "new": "নতুন"
+    },
+    "orders": {
+      "title": "অর্ডারসমূহ",
+      "id": "অর্ডার আইডি",
+      "customer": "গ্রাহক",
+      "total": "মোট",
+      "status": "অবস্থা",
+      "date": "তারিখ",
+      "viewDetails": "বিস্তারিত দেখুন",
+      "markShipped": "শিপড হিসেবে চিহ্নিত করুন",
+      "markDelivered": "ডেলিভারড হিসেবে চিহ্নিত করুন"
+    },
+    "categories": {
+      "title": "ক্যাটাগরি",
+      "add": "ক্যাটাগরি যোগ করুন",
+      "edit": "ক্যাটাগরি সম্পাদনা করুন",
+      "delete": "ক্যাটাগরি মুছুন",
+      "name": "ক্যাটাগরির নাম",
+      "description": "বিবরণ"
+    },
+    "users": {
+      "title": "ব্যবহারকারী",
+      "email": "ইমেইল",
+      "name": "নাম",
+      "phone": "ফোন",
+      "address": "ঠিকানা",
+      "role": "ভূমিকা",
+      "status": "সক্রিয়/নিষ্ক্রিয়"
+    },
+    "settings": {
+      "title": "সাইট সেটিংস",
+      "siteName": "সাইটের নাম",
+      "contactEmail": "যোগাযোগের ইমেইল",
+      "phone": "ফোন",
+      "address": "ঠিকানা",
+      "currency": "মুদ্রা",
+      "taxRate": "করের হার",
+      "shippingCost": "শিপিং খরচ"
+    }
+  },
+  "front": {
+    "header": {
+      "search": "পণ্য খুঁজুন",
+      "account": "অ্যাকাউন্ট",
+      "cart": "কার্ট",
+      "wishlist": "উইশলিস্ট",
+      "contact": "+১-৮০০-১২৩-৪৫৬৭"
+    },
+    "nav": {
+      "shopByCategory": "ক্যাটাগরি অনুযায়ী কেনাকাটা",
+      "aboutUs": "আমাদের সম্পর্কে",
+      "contactUs": "যোগাযোগ",
+      "blog": "ব্লগ",
+      "help": "সাহায্য",
+      "affiliates": "অ্যাফিলিয়েটস",
+      "recentPosts": "সাম্প্রতিক পোস্ট",
+      "conditions": "শর্তাবলী",
+      "more": "আরও",
+      "get20": "২০% ছাড় পান"
+    },
+    "hero": {
+      "title": "স্টাইল.ওয়্যার",
+      "subtitle": "নতুন ব্র্যান্ডের পোশাক আসছে",
+      "shopNow": "এখনই কিনুন",
+      "backpackPromo": "ব্যাকপ্যাক",
+      "shoesPromo": "জুতো",
+      "newCollection": "নতুন কালেকশন",
+      "trendingNow": "ট্রেন্ডিং"
+    },
+    "sidebar": {
+      "clothing": "পোশাক",
+      "shoes": "জুতো",
+      "jewelry": "ফ্যাশন গহনা",
+      "mensFashion": "পুরুষদের ফ্যাশন",
+      "womensFashion": "মহিলাদের ফ্যাশন",
+      "footwear": "ফুটওয়্যার",
+      "beauty": "সৌন্দর্য ও যত্ন",
+      "furniture": "আসবাবপত্র",
+      "bags": "ব্যাগ ও ব্যাকপ্যাক",
+      "watches": "ঘড়ি"
+    },
+    "product": {
+      "price": "মূল্য",
+      "stock": "স্টক",
+      "addToCart": "কার্টে যোগ করুন",
+      "description": "বিবরণ",
+      "rating": "রেটিং",
+      "reviews": "রিভিউ"
+    },
+    "cart": {
+      "items": "কার্টের আইটেম",
+      "quantity": "পরিমাণ",
+      "total": "মোট",
+      "checkout": "চেকআউট",
+      "continueShopping": "কেনাকাটা চালিয়ে যান"
+    },
+    "checkout": {
+      "shipping": "শিপিং ঠিকানা",
+      "payment": "পেমেন্ট পদ্ধতি",
+      "summary": "অর্ডার সারাংশ",
+      "placeOrder": "অর্ডার করুন"
+    },
+    "account": {
+      "orders": "আমার অর্ডারসমূহ",
+      "wishlist": "আমার উইশলিস্ট",
+      "profile": "আমার প্রোফাইল",
+      "settings": "সেটিংস",
+      "logout": "লগআউট"
+    },
+    "footer": {
+      "about": "সম্পর্কে",
+      "contact": "যোগাযোগ",
+      "categories": "ক্যাটাগরি",
+      "popularBrands": "জনপ্রিয় ব্র্যান্ড",
+      "newsletter": "আমাদের নিউজলেটারে সাবস্ক্রাইব করুন",
+      "newsletterDesc": "নতুন পণ্য এবং আসন্ন বিক্রয়ের সর্বশেষ আপডেট পান",
+      "subscribe": "সাবস্ক্রাইব",
+      "enterEmail": "আপনার ইমেইল লিখুন",
+      "downloadApp": "আমাদের অ্যাপ ডাউনলোড করুন",
+      "rights": "সর্বস্বত্ব সংরক্ষিত।",
+      "privacy": "গোপনীয়তা নীতি",
+      "terms": "সেবার শর্তাবলী",
+      "help": "সাহায্য",
+      "navigate": "নেভিগেট"
+    },
+    "blog": {
+      "title": "আমাদের ব্লগের সর্বশেষ",
+      "readMore": "আরও পড়ুন",
+      "postedBy": "পোস্ট করেছেন",
+      "postedOn": "প্রকাশিত"
+    }
+  },
+  "common": {
+    "save": "সংরক্ষণ করুন",
+    "cancel": "বাতিল করুন",
+    "delete": "মুছুন",
+    "edit": "সম্পাদনা করুন",
+    "add": "যোগ করুন",
+    "search": "খুঁজুন",
+    "filter": "ফিল্টার",
+    "sort": "সাজান",
+    "export": "এক্সপোর্ট",
+    "import": "ইমপোর্ট",
+    "success": "সফল",
+    "error": "ত্রুটি",
+    "loading": "লোড হচ্ছে...",
+    "noResults": "কোন ফলাফল পাওয়া যায়নি",
+    "back": "ফিরে যান",
+    "next": "পরবর্তী",
+    "previous": "পূর্ববর্তী",
+    "confirm": "আপনি কি নিশ্চিত?",
+    "currency": "৳"
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "admin": {
+    "nav": {
+      "products": "Products",
+      "orders": "Orders",
+      "categories": "Categories",
+      "users": "Users",
+      "settings": "Settings",
+      "dashboard": "Dashboard"
+    },
+    "products": {
+      "add": "Add Product",
+      "edit": "Edit Product",
+      "delete": "Delete Product",
+      "name": "Product Name",
+      "description": "Description",
+      "price": "Price",
+      "stock": "Stock",
+      "category": "Category",
+      "image": "Image",
+      "featured": "Featured",
+      "bestseller": "Bestseller",
+      "new": "New"
+    },
+    "orders": {
+      "title": "Orders",
+      "id": "Order ID",
+      "customer": "Customer",
+      "total": "Total",
+      "status": "Status",
+      "date": "Date",
+      "viewDetails": "View Details",
+      "markShipped": "Mark as Shipped",
+      "markDelivered": "Mark as Delivered"
+    },
+    "categories": {
+      "title": "Categories",
+      "add": "Add Category",
+      "edit": "Edit Category",
+      "delete": "Delete Category",
+      "name": "Category Name",
+      "description": "Description"
+    },
+    "users": {
+      "title": "Users",
+      "email": "User Email",
+      "name": "Name",
+      "phone": "Phone",
+      "address": "Address",
+      "role": "Role",
+      "status": "Active/Inactive"
+    },
+    "settings": {
+      "title": "Site Settings",
+      "siteName": "Site Name",
+      "contactEmail": "Contact Email",
+      "phone": "Phone",
+      "address": "Address",
+      "currency": "Currency",
+      "taxRate": "Tax Rate",
+      "shippingCost": "Shipping Cost"
+    }
+  },
+  "front": {
+    "header": {
+      "search": "Search products",
+      "account": "Account",
+      "cart": "Cart",
+      "wishlist": "Wishlist",
+      "contact": "+1-800-123-4567"
+    },
+    "nav": {
+      "shopByCategory": "SHOP BY CATEGORIES",
+      "aboutUs": "About Us",
+      "contactUs": "Contact Us",
+      "blog": "Blog",
+      "help": "Help",
+      "affiliates": "Affiliates",
+      "recentPosts": "Recent Posts",
+      "conditions": "Blogs & Conditions",
+      "more": "More",
+      "get20": "Get 20%"
+    },
+    "hero": {
+      "title": "STYLES.WEAR",
+      "subtitle": "New Brands Cloth Incoming",
+      "shopNow": "Shop Now",
+      "backpackPromo": "Backpack",
+      "shoesPromo": "Shoes",
+      "newCollection": "New Collection",
+      "trendingNow": "Trending Now"
+    },
+    "sidebar": {
+      "clothing": "Clothing",
+      "shoes": "Shoes",
+      "jewelry": "Fashion Jewelry",
+      "mensFashion": "Men's Fashion",
+      "womensFashion": "Women's Fashion",
+      "footwear": "Footwear",
+      "beauty": "Beauty & Care",
+      "furniture": "Furniture",
+      "bags": "Bags & Backpack",
+      "watches": "Watches"
+    },
+    "product": {
+      "price": "Price",
+      "stock": "Stock",
+      "addToCart": "Add to Cart",
+      "description": "Description",
+      "rating": "Rating",
+      "reviews": "Reviews"
+    },
+    "cart": {
+      "items": "Cart Items",
+      "quantity": "Quantity",
+      "total": "Total",
+      "checkout": "Checkout",
+      "continueShopping": "Continue Shopping"
+    },
+    "checkout": {
+      "shipping": "Shipping Address",
+      "payment": "Payment Method",
+      "summary": "Order Summary",
+      "placeOrder": "Place Order"
+    },
+    "account": {
+      "orders": "My Orders",
+      "wishlist": "My Wishlist",
+      "profile": "My Profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "footer": {
+      "about": "About",
+      "contact": "Contact",
+      "categories": "Categories",
+      "popularBrands": "Popular brands",
+      "newsletter": "Subscribe to our newsletter",
+      "newsletterDesc": "Get the latest updates on new products and upcoming sales",
+      "subscribe": "Subscribe",
+      "enterEmail": "Enter your email",
+      "downloadApp": "Download our app",
+      "rights": "All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "help": "Help",
+      "navigate": "Navigate"
+    },
+    "blog": {
+      "title": "Latest from our blog",
+      "readMore": "Read More",
+      "postedBy": "Posted by",
+      "postedOn": "Posted on"
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "export": "Export",
+    "import": "Import",
+    "success": "Success",
+    "error": "Error",
+    "loading": "Loading...",
+    "noResults": "No Results",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "confirm": "Are you sure?",
+    "currency": "₹"
+  }
+}

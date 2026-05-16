@@ -1,0 +1,106 @@
+import React, { useState, useEffect } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+import pb from '@/lib/pocketbaseClient';
+
+const ShopCategoriesGrid = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const records = await pb.collection('categories').getList(1, 6, {
+        sort: '-created',
+        $autoCancel: false
+      });
+      setCategories(records.items);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="py-12 bg-gray-50">
+        <div className="container-custom mx-auto px-4">
+          <Skeleton className="h-8 w-64 mb-8 mx-auto" />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="space-y-3">
+                <Skeleton className="aspect-square rounded-lg" />
+                <Skeleton className="h-4 w-3/4 mx-auto" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const defaultCategories = [
+    { name: "Women's Fashion", color: 'bg-pink-100' },
+    { name: "Fashion Jewelry", color: 'bg-purple-100' },
+    { name: "Men's Fashion", color: 'bg-blue-100' },
+    { name: "Kid's Fashion", color: 'bg-yellow-100' },
+    { name: "Footwear", color: 'bg-green-100' },
+    { name: "Shop All", color: 'bg-orange-100' }
+  ];
+
+  const displayCategories = categories.length > 0 ? categories : defaultCategories;
+
+  return (
+    <div className="py-12 bg-gray-50">
+      <div className="container-custom mx-auto px-4">
+        <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Shop by categories</h2>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {displayCategories.map((category, index) => {
+            const imageUrl = category.image 
+              ? pb.files.getUrl(category, category.image, { thumb: '300x300' })
+              : null;
+            
+            return (
+              <div 
+                key={category.id || index}
+                className="group cursor-pointer"
+              >
+                <div className={`aspect-square rounded-lg overflow-hidden mb-3 ${!imageUrl ? (category.color || 'bg-gray-200') : ''} relative`}>
+                  {imageUrl ? (
+                    <img 
+                      src={imageUrl}
+                      alt={category.name}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-4xl opacity-20">👗</span>
+                    </div>
+                  )}
+                  
+                  {/* Dot indicators */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+                    <div className="w-2 h-2 rounded-full bg-white/60"></div>
+                    <div className="w-2 h-2 rounded-full bg-white"></div>
+                    <div className="w-2 h-2 rounded-full bg-white/60"></div>
+                  </div>
+                </div>
+                
+                <h3 className="text-sm font-medium text-center text-gray-900 group-hover:text-[#FF8C00] transition-colors duration-200">
+                  {category.name}
+                </h3>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ShopCategoriesGrid;
