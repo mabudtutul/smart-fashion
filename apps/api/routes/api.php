@@ -19,7 +19,7 @@ Route::prefix('v1')->group(function (): void {
     Route::get('products/{product}', [ProductController::class, 'show']);
 
     Route::prefix('auth')->group(function (): void {
-        Route::post('login', [AuthController::class, 'login']);
+        Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
 
         Route::middleware('auth:sanctum')->group(function (): void {
             Route::get('me', [AuthController::class, 'me']);
@@ -27,26 +27,24 @@ Route::prefix('v1')->group(function (): void {
         });
     });
 
-    Route::prefix('admin')->group(function (): void {
+    Route::prefix('admin')->middleware('auth:sanctum')->group(function (): void {
         Route::get('products', [ProductCatalogController::class, 'index']);
         Route::get('products/{product}', [ProductCatalogController::class, 'show']);
         Route::get('categories', [CategoryCatalogController::class, 'index']);
         Route::get('categories/{category}', [CategoryCatalogController::class, 'show']);
 
-        Route::middleware('auth:sanctum')->group(function (): void {
-            Route::post('products', [ProductCatalogController::class, 'store']);
-            Route::put('products/{product}', [ProductCatalogController::class, 'update']);
-            Route::delete('products/{product}', [ProductCatalogController::class, 'destroy']);
-            Route::post('categories', [CategoryCatalogController::class, 'store']);
-            Route::put('categories/{category}', [CategoryCatalogController::class, 'update']);
-            Route::delete('categories/{category}', [CategoryCatalogController::class, 'destroy']);
+        Route::post('products', [ProductCatalogController::class, 'store']);
+        Route::put('products/{product}', [ProductCatalogController::class, 'update']);
+        Route::delete('products/{product}', [ProductCatalogController::class, 'destroy']);
+        Route::post('categories', [CategoryCatalogController::class, 'store']);
+        Route::put('categories/{category}', [CategoryCatalogController::class, 'update']);
+        Route::delete('categories/{category}', [CategoryCatalogController::class, 'destroy']);
 
-            /** @deprecated PB dual-write bridge — omit when VITE_ADMIN_CATALOG_DRIVER=laravel */
-            Route::put('products/{product}/sync', [ProductSyncController::class, 'upsert']);
-            Route::put('categories/{category}/sync', [CategorySyncController::class, 'upsert']);
+        /** @deprecated PB dual-write bridge */
+        Route::put('products/{product}/sync', [ProductSyncController::class, 'upsert']);
+        Route::put('categories/{category}/sync', [CategorySyncController::class, 'upsert']);
 
-            Route::post('products/{product}/image', [ProductImageController::class, 'store']);
-            Route::post('categories/{category}/image', [CategoryImageController::class, 'store']);
-        });
+        Route::post('products/{product}/image', [ProductImageController::class, 'store']);
+        Route::post('categories/{category}/image', [CategoryImageController::class, 'store']);
     });
 });

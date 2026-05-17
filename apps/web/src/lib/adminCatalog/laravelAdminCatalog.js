@@ -1,35 +1,20 @@
 import { adminApiUrl, adminAuthorizedJson } from '@/lib/adminCatalog/laravelAdminApi.js';
-import { resolveApiBaseUrl } from '@/lib/catalog/config.js';
 
-function publicAdminUrl(path, query = {}) {
-  const base = resolveApiBaseUrl();
-  const url = new URL(`/api/v1/admin${path}`, `${base}/`);
+function adminListUrl(path, query = {}) {
+  const url = adminApiUrl(path);
+  const parsed = new URL(url);
   Object.entries(query).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
-      url.searchParams.set(key, String(value));
+      parsed.searchParams.set(key, String(value));
     }
   });
-  return url.toString();
-}
-
-async function fetchPublicJson(url) {
-  const response = await fetch(url, {
-    headers: { Accept: 'application/json' },
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const error = new Error(data?.message || `Admin catalog API ${response.status}`);
-    error.status = response.status;
-    error.data = data;
-    throw error;
-  }
-  return data;
+  return parsed.toString();
 }
 
 export const laravelAdminCatalog = {
   listProducts(page, perPage, options = {}) {
-    return fetchPublicJson(
-      publicAdminUrl('/products', {
+    return adminAuthorizedJson(
+      adminListUrl('/products', {
         page,
         perPage,
         sort: options.sort,
@@ -39,8 +24,8 @@ export const laravelAdminCatalog = {
   },
 
   listCategories(page, perPage, options = {}) {
-    return fetchPublicJson(
-      publicAdminUrl('/categories', {
+    return adminAuthorizedJson(
+      adminListUrl('/categories', {
         page,
         perPage,
         sort: options.sort,
@@ -50,11 +35,11 @@ export const laravelAdminCatalog = {
   },
 
   getProduct(id) {
-    return fetchPublicJson(publicAdminUrl(`/products/${encodeURIComponent(id)}`));
+    return adminAuthorizedJson(adminApiUrl(`/products/${encodeURIComponent(id)}`));
   },
 
   getCategory(id) {
-    return fetchPublicJson(publicAdminUrl(`/categories/${encodeURIComponent(id)}`));
+    return adminAuthorizedJson(adminApiUrl(`/categories/${encodeURIComponent(id)}`));
   },
 
   createProduct(payload) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\AdminLoginRequest;
 use App\Http\Resources\AdminResource;
 use App\Models\Admin;
 use Illuminate\Http\JsonResponse;
@@ -10,17 +11,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Foundation auth API — backend only (frontend still on PocketBase until L4).
- */
 class AuthController extends Controller
 {
-    public function login(Request $request): JsonResponse
+    public function login(AdminLoginRequest $request): JsonResponse
     {
-        $credentials = $request->validate([
-            'identity' => ['required', 'string'],
-            'password' => ['required', 'string'],
-        ]);
+        $credentials = $request->validated();
 
         $admin = Admin::query()->where('email', $credentials['identity'])->first();
 

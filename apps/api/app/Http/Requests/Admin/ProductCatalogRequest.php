@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProductCatalogRequest extends FormRequest
 {
@@ -17,7 +18,8 @@ class ProductCatalogRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
-            'category' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'string', 'max:255', Rule::exists('categories', 'name')],
+            'rating' => ['nullable', 'numeric', 'min:0', 'max:5'],
             'stock' => ['nullable', 'integer', 'min:0'],
             'discount' => ['nullable', 'integer', 'min:0', 'max:100'],
             'featured' => ['sometimes', 'boolean'],
@@ -41,6 +43,7 @@ class ProductCatalogRequest extends FormRequest
             'featured' => (bool) ($data['featured'] ?? false),
             'bestseller' => (bool) ($data['bestseller'] ?? false),
             'is_new' => (bool) ($data['new'] ?? false),
+            'rating' => $data['rating'] ?? null,
         ];
     }
 }

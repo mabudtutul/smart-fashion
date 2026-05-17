@@ -12,36 +12,53 @@ function normalizePocketBaseOrigin(url) {
   return base;
 }
 
+export function isPocketBaseConfigured() {
+  return Boolean((import.meta.env.VITE_POCKETBASE_URL ?? '').trim());
+}
+
 export function resolvePocketBaseUrl() {
   const configured = (import.meta.env.VITE_POCKETBASE_URL ?? '').trim();
   if (!configured) {
     throw new Error(
-      'VITE_POCKETBASE_URL is required (e.g. https://your-pocketbase-url.up.railway.app).'
+      'VITE_POCKETBASE_URL is required for PocketBase features (e.g. blog).'
     );
   }
   return normalizePocketBaseOrigin(configured);
 }
 
-/** PocketBase host from VITE_POCKETBASE_URL — requests go to ${POCKETBASE_API_URL}/api/... */
-export const POCKETBASE_API_URL = resolvePocketBaseUrl();
+export function getPocketBaseApiUrl() {
+  return resolvePocketBaseUrl();
+}
+
 export const PB_AUTH_STORAGE_KEY = 'pb_auth_smartfashion_hcgi';
 
 export const pbAuthStore = new BaseAuthStore();
-const pb = new PocketBase(POCKETBASE_API_URL, pbAuthStore);
 
-if (typeof window !== 'undefined') {
-  window.__SMARTFASHION_PB__ = pb;
+let pbInstance = null;
+
+function getPbInstance() {
+  if (!pbInstance) {
+    pbInstance = new PocketBase(resolvePocketBaseUrl(), pbAuthStore);
+    if (typeof window !== 'undefined') {
+      window.__SMARTFASHION_PB__ = pbInstance;
+    }
+    if (import.meta.env.DEV) {
+      console.log('[SmartFashion] PocketBase baseUrl', getPocketBaseApiUrl());
+    }
+  }
+  return pbInstance;
 }
 
-if (import.meta.env.DEV) {
-  console.log('[SmartFashion] PocketBase baseUrl', POCKETBASE_API_URL);
-}
-if (typeof window !== 'undefined') {
-  console.log(
-    '[SmartFashion auth] singleton pocketbaseClient',
-    pb === window.__SMARTFASHION_PB__
-  );
-}
+const pb = new Proxy(
+  {},
+  {
+    get(_target, prop) {
+      const client = getPbInstance();
+      const value = client[prop];
+      return typeof value === 'function' ? value.bind(client) : value;
+    },
+  }
+);
 
 function isAuthRecord(value) {
   return (
@@ -151,7 +168,7 @@ function markAuthEndpointHtmlFailure(requestUrl, response, rawText) {
     {
       url: String(requestUrl || ''),
       status: response?.status,
-      baseUrl: POCKETBASE_API_URL,
+      baseUrl: getPocketBaseApiUrl(),
       snippet: (rawText || '').slice(0, 120),
     }
   );

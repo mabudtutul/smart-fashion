@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CategoryCatalogRequest extends FormRequest
 {
@@ -14,7 +16,16 @@ class CategoryCatalogRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name')->ignore(
+                    $this->route('category') instanceof Category
+                        ? $this->route('category')->getKey()
+                        : $this->route('category')
+                ),
+            ],
             'description' => ['nullable', 'string'],
         ];
     }
