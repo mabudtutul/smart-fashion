@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getRecordImageUrl } from '@/lib/catalog';
+import { CATALOG_IMAGE_PLACEHOLDER } from '@/utils/catalogPlaceholder.js';
 import { formatPrice } from '@/utils/formatPrice.js';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 import { useCart } from '@/context/CartContext.jsx';
@@ -12,9 +13,7 @@ const ProductCard = ({ product }) => {
   const { i18n, t } = useTranslationWithFallback();
   const { addItem } = useCart();
 
-  const imageUrl =
-    getRecordImageUrl(product, { thumb: '300x300' }) ??
-    'https://via.placeholder.com/300x300?text=No+Image';
+  const imageUrl = getRecordImageUrl(product, { thumb: '300x300' }) ?? CATALOG_IMAGE_PLACEHOLDER;
 
   const discountedPrice = product.discount ? product.price - (product.price * product.discount) / 100 : product.price;
 
@@ -40,7 +39,12 @@ const ProductCard = ({ product }) => {
           <img
             src={imageUrl}
             alt={product.name}
+            loading="lazy"
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = CATALOG_IMAGE_PLACEHOLDER;
+            }}
           />
           {product.discount > 0 && (
             <div className="absolute left-3 top-3 rounded bg-yellow-400 px-2 py-1 text-xs font-semibold text-black">

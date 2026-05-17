@@ -22,7 +22,7 @@ const BestSellersCarousel = () => {
       setLoading(true);
       setError(null);
       const records = await catalog.listProducts(1, 10, {
-        filter: 'bestseller = true',
+        bestseller: true,
         sort: '-created',
       });
       setProducts(records.items);
