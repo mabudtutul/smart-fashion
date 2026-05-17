@@ -11,9 +11,19 @@ export const pocketbaseCatalog = {
   },
 
   async listProducts(page, perPage, options = {}) {
+    const { category, featured, bestseller, new: isNew, ...rest } = options;
+    const filterParts = [];
+    if (category) {
+      filterParts.push(`category = ${JSON.stringify(category)}`);
+    }
+    if (featured === true) filterParts.push('featured = true');
+    if (bestseller === true) filterParts.push('bestseller = true');
+    if (isNew === true) filterParts.push('new = true');
+
     return pb.collection('products').getList(page, perPage, {
       ...defaultListOptions,
-      ...options,
+      ...rest,
+      ...(filterParts.length ? { filter: filterParts.join(' && ') } : {}),
     });
   },
 

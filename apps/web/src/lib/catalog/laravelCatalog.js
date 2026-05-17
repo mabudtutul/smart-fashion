@@ -1,4 +1,5 @@
 import { resolveApiBaseUrl } from '@/lib/catalog/config.js';
+import { fetchCatalogJson, normalizeListPayload } from '@/lib/catalog/catalogHttp.js';
 
 function v1Url(path, query = {}) {
   const base = resolveApiBaseUrl();
@@ -11,41 +12,43 @@ function v1Url(path, query = {}) {
   return url.toString();
 }
 
-async function fetchJson(url) {
-  const response = await fetch(url, {
-    headers: { Accept: 'application/json' },
-  });
-  if (!response.ok) {
-    const error = new Error(`Catalog API ${response.status}`);
-    error.status = response.status;
-    throw error;
-  }
-  return response.json();
-}
-
 export const laravelCatalog = {
   async listCategories(page, perPage, options = {}) {
-    return fetchJson(
+    const data = await fetchCatalogJson(
       v1Url('/categories', {
         page,
         perPage,
         sort: options.sort,
       })
     );
+    return normalizeListPayload(data);
   },
 
   async listProducts(page, perPage, options = {}) {
-    return fetchJson(
-      v1Url('/products', {
-        page,
-        perPage,
-        sort: options.sort,
-        filter: options.filter,
-      })
-    );
+    const query = {
+      page,
+      perPage,
+      sort: options.sort,
+      filter: options.filter,
+    };
+    if (options.category) {
+      query.category = options.category;
+    }
+    if (options.featured === true) {
+      query.featured = 'true';
+    }
+    if (options.bestseller === true) {
+      query.bestseller = 'true';
+    }
+    if (options.new === true) {
+      query.new = 'true';
+    }
+
+    const data = await fetchCatalogJson(v1Url('/products', query));
+    return normalizeListPayload(data);
   },
 
   async getProduct(id) {
-    return fetchJson(v1Url(`/products/${encodeURIComponent(id)}`));
+    return fetchCatalogJson(v1Url(`/products/${encodeURIComponent(id)}`));
   },
 };

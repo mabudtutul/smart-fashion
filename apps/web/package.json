@@ -9,7 +9,8 @@
     "build:clean": "node tools/clean-dist.js && node tools/generate-llms.js && vite build && node tools/verify-dist.js",
     "start": "vite preview --outDir ../../dist/apps/web --host :: --port 3000",
     "lint": "eslint . --quiet",
-    "lint:warn": "eslint ."
+    "lint:warn": "eslint .",
+    "verify:api": "bash ../api/deploy/smoke-staging.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

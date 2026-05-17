@@ -31,7 +31,29 @@ export async function adminAuthorizedJson(url, options = {}) {
     },
   });
 
-  const data = await response.json().catch(() => ({}));
+  const text = await response.text();
+  const trimmed = text.trim();
+  let data = {};
+  if (trimmed) {
+    try {
+      data = JSON.parse(trimmed);
+    } catch {
+      data = {};
+    }
+  }
+
+  const looksHtml =
+    (response.headers.get('content-type') || '').includes('text/html') ||
+    trimmed.startsWith('<!') ||
+    trimmed.startsWith('<html');
+
+  if (looksHtml || (response.ok && typeof data !== 'object')) {
+    const error = new Error(
+      'Admin API returned HTML instead of JSON. Check api.smartfashion.site Laravel bootstrap.'
+    );
+    error.status = response.status;
+    throw error;
+  }
 
   if (!response.ok) {
     const error = new Error(messageFromApiBody(data, `Request failed (${response.status}).`));

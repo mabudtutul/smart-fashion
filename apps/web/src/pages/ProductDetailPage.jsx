@@ -6,6 +6,7 @@ import Header from '@/components/Header.jsx';
 import OrangeNavBar from '@/components/OrangeNavBar.jsx';
 import Footer from '@/components/Footer.jsx';
 import { catalog, getRecordImageUrl } from '@/lib/catalog';
+import { CATALOG_IMAGE_PLACEHOLDER } from '@/utils/catalogPlaceholder.js';
 import { formatPrice } from '@/utils/formatPrice.js';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 import { useCart } from '@/context/CartContext.jsx';
@@ -49,9 +50,7 @@ const ProductDetailPage = () => {
     };
   }, [id]);
 
-  const imageUrl =
-    getRecordImageUrl(product, { thumb: '600x600' }) ??
-    'https://via.placeholder.com/600x600?text=No+Image';
+  const imageUrl = getRecordImageUrl(product, { thumb: '600x600' }) ?? CATALOG_IMAGE_PLACEHOLDER;
 
   const discounted =
     product && product.discount > 0
@@ -115,7 +114,15 @@ const ProductDetailPage = () => {
         </Link>
         <div className="grid gap-10 md:grid-cols-2">
           <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
-            <img src={imageUrl} alt={product.name} className="h-full w-full object-cover object-center" />
+            <img
+              src={imageUrl}
+              alt={product.name}
+              className="h-full w-full object-cover object-center"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = CATALOG_IMAGE_PLACEHOLDER;
+              }}
+            />
           </div>
           <div className="flex min-w-0 flex-col">
             <h1 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl" style={{ letterSpacing: '-0.02em' }}>

@@ -1,0 +1,7 @@
+api.smartfashion.site returns HTML/404 for /api/v1/* — fix on Hostinger:
+
+1. public_html/index.php must bootstrap ../private/smartfashion-api (see hostinger-public-index.php)
+2. public_html/.htaccess must rewrite to index.php
+3. APP_URL=https://api.smartfashion.site in .env
+4. php artisan route:cache && config:cache
+5. Re-run: STAGING_API=https://api.smartfashion.site bash deploy/smoke-staging.sh

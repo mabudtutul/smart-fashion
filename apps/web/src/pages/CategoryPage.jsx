@@ -5,7 +5,7 @@ import Header from '@/components/Header.jsx';
 import OrangeNavBar from '@/components/OrangeNavBar.jsx';
 import Footer from '@/components/Footer.jsx';
 import ProductCard from '@/components/ProductCard.jsx';
-import { catalog } from '@/lib/catalog';
+import { catalog, catalogErrorMessage } from '@/lib/catalog';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -29,15 +29,18 @@ const CategoryPage = () => {
       setLoading(true);
       setError(null);
       try {
-        const safe = JSON.stringify(decoded);
         const records = await catalog.listProducts(1, 50, {
-          filter: `category = ${safe}`,
+          category: decoded,
           sort: '-created',
         });
-        if (!cancelled) setProducts(records.items);
+        if (!cancelled) setProducts(records.items ?? []);
       } catch (err) {
-        console.error(err);
-        if (!cancelled) setError(t('front.category.loadError', 'Could not load products.'));
+        if (import.meta.env.DEV) console.error(err);
+        if (!cancelled) {
+          setError(
+            catalogErrorMessage(err, t('front.category.loadError', 'Could not load products.'))
+          );
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

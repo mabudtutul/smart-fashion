@@ -22,7 +22,7 @@ const FeaturedProductsCarousel = () => {
       setLoading(true);
       setError(null);
       const records = await catalog.listProducts(1, 12, {
-        filter: 'featured = true',
+        featured: true,
         sort: '-created',
       });
       setProducts(records.items);

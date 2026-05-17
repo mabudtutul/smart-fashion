@@ -4,6 +4,7 @@ import { pocketbaseCatalog } from '@/lib/catalog/pocketbaseCatalog.js';
 
 export { getBackendDriver, isLaravelCatalog, resolveApiBaseUrl } from '@/lib/catalog/config.js';
 export { getRecordImageUrl } from '@/lib/catalog/recordImageUrl.js';
+export { CatalogApiError, catalogErrorMessage, isCatalogApiError } from '@/lib/catalog/catalogHttp.js';
 
 /** Read-only storefront catalog (PocketBase or Laravel). */
 export const catalog = isLaravelCatalog() ? laravelCatalog : pocketbaseCatalog;

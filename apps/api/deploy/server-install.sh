@@ -32,4 +32,8 @@ if [[ -d "${UPLOADS}" ]]; then
 fi
 
 php artisan about --only=environment,cache,drivers 2>/dev/null || php artisan --version
-echo "Install complete. Run import + deploy/smoke-staging.sh"
+
+echo "→ verify catalog (after import)"
+php artisan catalog:verify-import 2>/dev/null || echo "  (skip until import complete)"
+
+echo "Install complete. Run: catalog:import-pocketbase, catalog:verify-import, deploy/smoke-staging.sh"
