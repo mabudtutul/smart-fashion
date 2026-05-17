@@ -21,8 +21,25 @@ class CatalogImageProcessor
     {
         $this->assertSafeId($productId);
 
-        return $this->process(
-            $file,
+        $path = $file->getRealPath();
+        if ($path === false) {
+            throw ValidationException::withMessages(['image' => ['Invalid upload.']]);
+        }
+
+        return $this->processFromPath(
+            $path,
+            "products/{$productId}",
+            config('media.products', [])
+        );
+    }
+
+    /** @return array<string, string> */
+    public function processProductFromPath(string $sourcePath, string $productId): array
+    {
+        $this->assertSafeId($productId);
+
+        return $this->processFromPath(
+            $sourcePath,
             "products/{$productId}",
             config('media.products', [])
         );
@@ -36,8 +53,25 @@ class CatalogImageProcessor
     {
         $this->assertSafeId($categoryId);
 
-        return $this->process(
-            $file,
+        $path = $file->getRealPath();
+        if ($path === false) {
+            throw ValidationException::withMessages(['image' => ['Invalid upload.']]);
+        }
+
+        return $this->processFromPath(
+            $path,
+            "categories/{$categoryId}",
+            config('media.categories', [])
+        );
+    }
+
+    /** @return array<string, string> */
+    public function processCategoryFromPath(string $sourcePath, string $categoryId): array
+    {
+        $this->assertSafeId($categoryId);
+
+        return $this->processFromPath(
+            $sourcePath,
             "categories/{$categoryId}",
             config('media.categories', [])
         );
@@ -47,18 +81,21 @@ class CatalogImageProcessor
      * @param  array<string, array{width: int, height: int}>  $variants
      * @return array<string, string>
      */
-    private function process(UploadedFile $file, string $relativeDir, array $variants): array
+    /**
+     * @param  array<string, array{width: int, height: int}>  $variants
+     * @return array<string, string>
+     */
+    public function processFromPath(string $sourcePath, string $relativeDir, array $variants): array
     {
         if ($variants === []) {
             throw ValidationException::withMessages(['image' => ['No media variants configured.']]);
         }
 
-        $tempPath = $file->getRealPath();
-        if ($tempPath === false) {
-            throw ValidationException::withMessages(['image' => ['Invalid upload.']]);
+        if (! is_file($sourcePath)) {
+            throw ValidationException::withMessages(['image' => ["Image not found: {$sourcePath}"]]);
         }
 
-        $this->validateImageFile($tempPath);
+        $this->validateImageFile($sourcePath);
 
         $absoluteDir = public_path('uploads/'.$relativeDir);
         File::ensureDirectoryExists($absoluteDir);
@@ -77,7 +114,7 @@ class CatalogImageProcessor
             $destination = $absoluteDir.DIRECTORY_SEPARATOR.$filename;
 
             $this->images
-                ->read($tempPath)
+                ->read($sourcePath)
                 ->orient()
                 ->scaleDown($size['width'], $size['height'])
                 ->toWebp($quality)
