@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { clearAdminMediaSession, ensureLaravelMediaAuth } from '@/lib/adminMedia/index.js';
 import pb, {
   canRedirectToAdminProducts,
   clearAuthEndpointHtmlFlag,
@@ -92,11 +93,18 @@ export async function adminLogin(email, password) {
     throw new Error('Login succeeded but auth was not persisted.');
   }
 
+  try {
+    await ensureLaravelMediaAuth(email, password);
+  } catch (err) {
+    console.warn('[SmartFashion] Laravel media auth bridge failed', err);
+  }
+
   return true;
 }
 
 export function adminLogout() {
   clearPersistedAuth();
+  clearAdminMediaSession();
 }
 
 export function isAdminAuthenticated() {

@@ -1,0 +1,15 @@
+# Deploy from repo root: railway link && railway up --service pocketbase
+# Or set Railway service root directory to: apps/pocketbase
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+
+[[mounts]]
+source = "pocketbase_data"
+destination = "/data"

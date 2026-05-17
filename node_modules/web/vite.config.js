@@ -284,7 +284,10 @@ logger.error = (msg, options) => {
 	loggerError(msg, options);
 }
 
+const distOutDir = path.resolve(__dirname, '../../dist/apps/web');
+
 export default defineConfig({
+	base: '/',
 	optimizeDeps: {
 		include: allDeps,
 	},
@@ -319,6 +322,10 @@ export default defineConfig({
 		},
 	},
 	build: {
+		outDir: distOutDir,
+		emptyOutDir: true,
+		assetsDir: 'assets',
+		sourcemap: false,
 		rollupOptions: {
 			external: [
 				'@babel/parser',

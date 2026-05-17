@@ -7,3 +7,5 @@ apps/pocketbase/pocketbase.exe
 *.db-shm
 *.db-wal
 .env
+apps/api/vendor
+apps/api/.env

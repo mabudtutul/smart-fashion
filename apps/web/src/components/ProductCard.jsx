@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import pb from '@/lib/pocketbaseClient';
+import { getRecordImageUrl } from '@/lib/catalog';
 import { formatPrice } from '@/utils/formatPrice.js';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 import { useCart } from '@/context/CartContext.jsx';
@@ -12,9 +12,9 @@ const ProductCard = ({ product }) => {
   const { i18n, t } = useTranslationWithFallback();
   const { addItem } = useCart();
 
-  const imageUrl = product.image
-    ? pb.files.getUrl(product, product.image, { thumb: '300x300' })
-    : 'https://via.placeholder.com/300x300?text=No+Image';
+  const imageUrl =
+    getRecordImageUrl(product, { thumb: '300x300' }) ??
+    'https://via.placeholder.com/300x300?text=No+Image';
 
   const discountedPrice = product.discount ? product.price - (product.price * product.discount) / 100 : product.price;
 

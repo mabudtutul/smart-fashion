@@ -5,7 +5,7 @@ import Header from '@/components/Header.jsx';
 import OrangeNavBar from '@/components/OrangeNavBar.jsx';
 import Footer from '@/components/Footer.jsx';
 import ProductCard from '@/components/ProductCard.jsx';
-import pb from '@/lib/pocketbaseClient';
+import { catalog } from '@/lib/catalog';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -30,10 +30,9 @@ const CategoryPage = () => {
       setError(null);
       try {
         const safe = JSON.stringify(decoded);
-        const records = await pb.collection('products').getList(1, 50, {
+        const records = await catalog.listProducts(1, 50, {
           filter: `category = ${safe}`,
           sort: '-created',
-          $autoCancel: false
         });
         if (!cancelled) setProducts(records.items);
       } catch (err) {

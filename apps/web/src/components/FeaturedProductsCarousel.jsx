@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductCard from '@/components/ProductCard.jsx';
-import pb from '@/lib/pocketbaseClient.js';
+import { catalog } from '@/lib/catalog';
 
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 
@@ -21,10 +21,9 @@ const FeaturedProductsCarousel = () => {
     try {
       setLoading(true);
       setError(null);
-      const records = await pb.collection('products').getList(1, 12, {
+      const records = await catalog.listProducts(1, 12, {
         filter: 'featured = true',
         sort: '-created',
-        $autoCancel: false
       });
       setProducts(records.items);
     } catch (err) {

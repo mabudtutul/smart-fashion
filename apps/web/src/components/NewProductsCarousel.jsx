@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductCard from '@/components/ProductCard.jsx';
-import pb from '@/lib/pocketbaseClient.js';
+import { catalog } from '@/lib/catalog';
 
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 
@@ -21,10 +21,7 @@ const NewProductsCarousel = () => {
     try {
       setLoading(true);
       setError(null);
-      const records = await pb.collection('products').getList(1, 12, {
-        sort: '-created',
-        $autoCancel: false
-      });
+      const records = await catalog.listProducts(1, 12, { sort: '-created' });
       setProducts(records.items);
     } catch (err) {
       console.error('[NewProducts] Error fetching new products:', err);

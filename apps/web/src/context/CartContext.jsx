@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import pb from '@/lib/pocketbaseClient';
+import { getRecordImageUrl } from '@/lib/catalog';
 
 const STORAGE_KEY = 'smart-fashion-cart-v1';
 
@@ -44,9 +44,7 @@ export const CartProvider = ({ children }) => {
           name: product.name ?? 'Product',
           price: typeof product.price === 'number' ? product.price : 0,
           discount: typeof product.discount === 'number' ? product.discount : 0,
-          imageUrl: product.image
-            ? pb.files.getUrl(product, product.image, { thumb: '96x96' })
-            : undefined,
+          imageUrl: getRecordImageUrl(product, { thumb: '96x96' }) ?? undefined,
           quantity: 1
         }
       ];

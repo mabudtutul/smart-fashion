@@ -12,6 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { afterProductSaved, enrichAdminList, isLaravelAdminMedia } from '@/lib/adminMedia/index.js';
+import { getRecordImageUrl } from '@/lib/catalog/index.js';
 import pb from '@/lib/pocketbaseClient.js';
 import { toast } from 'sonner';
 
@@ -45,8 +47,8 @@ const ProductManagement = () => {
         pb.collection('products').getList(1, 100, { sort: '-created' }),
         pb.collection('categories').getList(1, 100, { sort: 'name' }),
       ]);
-      setProducts(productsRes.items);
-      setCategories(categoriesRes.items);
+      setProducts(enrichAdminList(productsRes.items));
+      setCategories(enrichAdminList(categoriesRes.items));
     } catch (err) {
       toast.error(err?.message || t('admin.products.loadFailed', 'পণ্য লোড করা যায়নি'));
     } finally {
@@ -109,15 +111,29 @@ const ProductManagement = () => {
       };
       if (form.stock !== '') payload.stock = Number(form.stock);
       if (form.discount !== '') payload.discount = Number(form.discount);
-      if (imageFile) payload.image = imageFile;
+      if (imageFile && !isLaravelAdminMedia()) {
+        payload.image = imageFile;
+      }
 
+      let record;
       if (editing) {
-        await pb.collection('products').update(editing.id, payload);
+        record = await pb.collection('products').update(editing.id, payload);
         toast.success(t('admin.products.updated', 'পণ্য আপডেট হয়েছে'));
       } else {
-        await pb.collection('products').create(payload);
+        record = await pb.collection('products').create(payload);
         toast.success(t('admin.products.created', 'পণ্য যোগ হয়েছে'));
       }
+
+      if (isLaravelAdminMedia()) {
+        if (imageFile) {
+          toast.loading(t('admin.products.uploading', 'ছবি আপলোড হচ্ছে…'), {
+            id: 'product-image-upload',
+          });
+        }
+        await afterProductSaved(record, imageFile);
+        toast.dismiss('product-image-upload');
+      }
+
       setDialogOpen(false);
       load();
     } catch (err) {
@@ -179,9 +195,15 @@ const ProductManagement = () => {
               products.map((product) => (
                 <tr key={product.id} className="border-b last:border-0">
                   <td className="px-4 py-3">
-                    {product.image ? (
+                    {getRecordImageUrl(
+                      { ...product, collectionName: 'products' },
+                      { thumb: '80x80' }
+                    ) ? (
                       <img
-                        src={pb.files.getUrl(product, product.image, { thumb: '80x80' })}
+                        src={getRecordImageUrl(
+                          { ...product, collectionName: 'products' },
+                          { thumb: '80x80' }
+                        )}
                         alt=""
                         className="h-12 w-12 object-cover rounded"
                       />
@@ -318,9 +340,15 @@ const ProductManagement = () => {
                 accept="image/jpeg,image/png,image/gif,image/webp"
                 onChange={(e) => setImageFile(e.target.files?.[0] || null)}
               />
-              {editing?.image && !imageFile && (
+              {editing && !imageFile && getRecordImageUrl(
+                { ...editing, collectionName: 'products' },
+                { thumb: '120x120' }
+              ) && (
                 <img
-                  src={pb.files.getUrl(editing, editing.image, { thumb: '120x120' })}
+                  src={getRecordImageUrl(
+                    { ...editing, collectionName: 'products' },
+                    { thumb: '120x120' }
+                  )}
                   alt=""
                   className="h-20 w-20 object-cover rounded mt-2"
                 />

@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import BlogCard from '@/components/BlogCard';
 import pb from '@/lib/pocketbaseClient';
+import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 
 const BlogSection = () => {
+  const { t } = useTranslationWithFallback();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -70,7 +72,7 @@ const BlogSection = () => {
     <div className="py-12 bg-white">
       <div className="container-custom mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Latest from our blog</h2>
+          <h2 className="text-3xl font-bold text-gray-900">{t('front.sections.blog', 'Latest from our blog')}</h2>
           <div className="flex gap-2">
             <Button
               size="icon"

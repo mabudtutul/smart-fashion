@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
-import pb from '@/lib/pocketbaseClient';
+import { catalog, getRecordImageUrl } from '@/lib/catalog';
 
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 
@@ -17,10 +17,7 @@ const ShopCategoriesGrid = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const records = await pb.collection('categories').getList(1, 6, {
-        sort: '-created',
-        $autoCancel: false
-      });
+      const records = await catalog.listCategories(1, 6, { sort: '-created' });
       setCategories(records.items);
     } catch (err) {
       console.error('Error fetching categories:', err);
@@ -65,9 +62,7 @@ const ShopCategoriesGrid = () => {
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {displayCategories.map((category, index) => {
-            const imageUrl = category.image 
-              ? pb.files.getUrl(category, category.image, { thumb: '300x300' })
-              : null;
+            const imageUrl = getRecordImageUrl(category, { thumb: '300x300' });
             
             return (
               <Link

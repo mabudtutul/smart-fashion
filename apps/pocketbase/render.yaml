@@ -1,0 +1,17 @@
+# Render Blueprint — set root directory to apps/pocketbase when importing.
+services:
+  - type: web
+    name: smartfashion-pocketbase
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /api/health
+    disk:
+      name: pocketbase-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: PB_ENCRYPTION_KEY
+        generateValue: true
+      - key: PORT
+        value: "8090"

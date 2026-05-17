@@ -13,10 +13,11 @@ const LanguageSwitcher = () => {
 
   return (
     <Button 
+      type="button"
       variant="outline" 
       size="sm" 
       onClick={toggleLanguage}
-      className="flex items-center gap-2 border-gray-300 text-gray-700 hover:text-[#FF8C00] hover:border-[#FF8C00] transition-colors"
+      className="touch-manipulation flex items-center gap-2 border-gray-300 text-gray-700 transition-colors hover:border-[#FF8C00] hover:text-[#FF8C00]"
     >
       <Globe className="h-4 w-4" />
       <span className="font-medium">

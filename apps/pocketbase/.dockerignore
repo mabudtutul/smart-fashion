@@ -1,0 +1,8 @@
+pb_data
+pb_data_old
+pb_data_recovery_test
+pb_snapshots
+pocketbase.exe
+pocketbase.zip
+*.db
+*.db-*

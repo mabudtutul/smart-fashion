@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import Header from '@/components/Header.jsx';
 import OrangeNavBar from '@/components/OrangeNavBar.jsx';
 import Footer from '@/components/Footer.jsx';
-import pb from '@/lib/pocketbaseClient';
+import { catalog, getRecordImageUrl } from '@/lib/catalog';
 import { formatPrice } from '@/utils/formatPrice.js';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 import { useCart } from '@/context/CartContext.jsx';
@@ -32,7 +32,7 @@ const ProductDetailPage = () => {
       setLoading(true);
       setMissing(false);
       try {
-        const record = await pb.collection('products').getOne(id, { $autoCancel: false });
+        const record = await catalog.getProduct(id);
         if (!cancelled) setProduct(record);
       } catch {
         if (!cancelled) {
@@ -49,9 +49,9 @@ const ProductDetailPage = () => {
     };
   }, [id]);
 
-  const imageUrl = product?.image
-    ? pb.files.getUrl(product, product.image, { thumb: '600x600' })
-    : 'https://via.placeholder.com/600x600?text=No+Image';
+  const imageUrl =
+    getRecordImageUrl(product, { thumb: '600x600' }) ??
+    'https://via.placeholder.com/600x600?text=No+Image';
 
   const discounted =
     product && product.discount > 0
