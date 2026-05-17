@@ -1,3 +1,4 @@
+import { isLaravelAdminCatalog } from '@/lib/adminCatalog/config.js';
 import { isLaravelAdminMedia } from '@/lib/adminMedia/config.js';
 import {
   loginLaravelAdmin,
@@ -28,7 +29,9 @@ export async function ensureLaravelMediaAuth(email, password) {
 export async function afterProductSaved(record, imageFile, options) {
   if (!isLaravelAdminMedia()) return record;
 
-  await syncProductToLaravel(record);
+  if (!isLaravelAdminCatalog()) {
+    await syncProductToLaravel(record);
+  }
 
   if (imageFile) {
     const result = await uploadProductImage(record.id, imageFile, options);
@@ -41,7 +44,9 @@ export async function afterProductSaved(record, imageFile, options) {
 export async function afterCategorySaved(record, imageFile, options) {
   if (!isLaravelAdminMedia()) return record;
 
-  await syncCategoryToLaravel(record);
+  if (!isLaravelAdminCatalog()) {
+    await syncCategoryToLaravel(record);
+  }
 
   if (imageFile) {
     const result = await uploadCategoryImage(record.id, imageFile, options);
@@ -52,7 +57,10 @@ export async function afterCategorySaved(record, imageFile, options) {
 }
 
 export function enrichAdminList(items) {
-  return isLaravelAdminMedia() ? applyLaravelMediaCache(items) : items;
+  if (isLaravelAdminCatalog() || isLaravelAdminMedia()) {
+    return applyLaravelMediaCache(items);
+  }
+  return items;
 }
 
 export function clearAdminMediaSession() {

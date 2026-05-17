@@ -12,9 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { adminCatalog, isLaravelAdminCatalog } from '@/lib/adminCatalog/index.js';
 import { afterProductSaved, enrichAdminList, isLaravelAdminMedia } from '@/lib/adminMedia/index.js';
 import { getRecordImageUrl } from '@/lib/catalog/index.js';
-import pb from '@/lib/pocketbaseClient.js';
 import { toast } from 'sonner';
 
 const emptyForm = {
@@ -44,8 +44,8 @@ const ProductManagement = () => {
     setLoading(true);
     try {
       const [productsRes, categoriesRes] = await Promise.all([
-        pb.collection('products').getList(1, 100, { sort: '-created' }),
-        pb.collection('categories').getList(1, 100, { sort: 'name' }),
+        adminCatalog.listProducts(1, 100, { sort: '-created' }),
+        adminCatalog.listCategories(1, 100, { sort: 'name' }),
       ]);
       setProducts(enrichAdminList(productsRes.items));
       setCategories(enrichAdminList(categoriesRes.items));
@@ -111,16 +111,16 @@ const ProductManagement = () => {
       };
       if (form.stock !== '') payload.stock = Number(form.stock);
       if (form.discount !== '') payload.discount = Number(form.discount);
-      if (imageFile && !isLaravelAdminMedia()) {
+      if (imageFile && !isLaravelAdminCatalog()) {
         payload.image = imageFile;
       }
 
       let record;
       if (editing) {
-        record = await pb.collection('products').update(editing.id, payload);
+        record = await adminCatalog.updateProduct(editing.id, payload);
         toast.success(t('admin.products.updated', 'পণ্য আপডেট হয়েছে'));
       } else {
-        record = await pb.collection('products').create(payload);
+        record = await adminCatalog.createProduct(payload);
         toast.success(t('admin.products.created', 'পণ্য যোগ হয়েছে'));
       }
 
@@ -130,7 +130,7 @@ const ProductManagement = () => {
             id: 'product-image-upload',
           });
         }
-        await afterProductSaved(record, imageFile);
+        record = await afterProductSaved(record, imageFile);
         toast.dismiss('product-image-upload');
       }
 
@@ -146,7 +146,7 @@ const ProductManagement = () => {
   const handleDelete = async (product) => {
     if (!window.confirm(t('admin.products.deleteConfirm', 'এই পণ্যটি মুছবেন?'))) return;
     try {
-      await pb.collection('products').delete(product.id);
+      await adminCatalog.deleteProduct(product.id);
       toast.success(t('admin.products.deleted', 'পণ্য মুছে ফেলা হয়েছে'));
       load();
     } catch (err) {
