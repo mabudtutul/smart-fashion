@@ -1,0 +1,122 @@
+import { useSyncExternalStore } from 'react';
+import pb, {
+  canRedirectToAdminProducts,
+  clearPersistedAuth,
+  ensureStorageAccess,
+  extractAuthSession,
+  forcePersistAuthAfterLogin,
+  hasLocalStorageAuthKey,
+} from '@/lib/pocketbaseClient.js';
+
+console.log('PB INSTANCE adminAuth.js', pb);
+if (typeof window !== 'undefined') {
+  console.log(
+    '[SmartFashion auth] singleton adminAuth',
+    pb === window.__SMARTFASHION_PB__
+  );
+}
+
+/** Authenticate for admin CRUD (users collection first, then superuser). */
+export async function adminLogin(email, password) {
+  await ensureStorageAccess();
+
+  const collections = ['users', '_superusers'];
+  let lastError;
+  let authData;
+  let authedCollection;
+
+  for (const collection of collections) {
+    try {
+      authData = await pb.collection(collection).authWithPassword(email, password);
+      authedCollection = collection;
+      console.log('[SmartFashion auth] RAW authWithPassword', collection, authData);
+      break;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  if (!authData) {
+    throw lastError || new Error('Invalid login credentials.');
+  }
+
+  let { token, model } = extractAuthSession(authData);
+
+  if (!token && authedCollection) {
+    try {
+      const refreshed = await pb.collection(authedCollection).authRefresh();
+      console.log('[SmartFashion auth] RAW authRefresh', refreshed);
+      const refreshedSession = extractAuthSession(refreshed);
+      token = refreshedSession.token || token;
+      model = refreshedSession.model ?? model;
+    } catch (err) {
+      console.warn('[SmartFashion auth] authRefresh after login failed', err);
+    }
+  }
+
+  const sessionToken = (token || pb.authStore.token || '').trim();
+  const sessionModel =
+    model ?? pb.authStore.record ?? pb.authStore.model ?? null;
+
+  console.log('[SmartFashion auth] sessionToken length', sessionToken.length);
+
+  if (!sessionToken) {
+    console.error('[SmartFashion auth] no token in response', {
+      authData,
+      raw: window.__SMARTFASHION_RAW_AUTH_RESPONSE__,
+      storeToken: pb.authStore.token,
+    });
+    throw new Error('Login succeeded but auth was not persisted.');
+  }
+
+  if (!forcePersistAuthAfterLogin(sessionToken, sessionModel)) {
+    throw new Error('Login succeeded but auth was not persisted.');
+  }
+
+  if (!hasLocalStorageAuthKey() || !canRedirectToAdminProducts()) {
+    throw new Error('Login succeeded but auth was not persisted.');
+  }
+
+  return true;
+}
+
+export function adminLogout() {
+  clearPersistedAuth();
+}
+
+export function isAdminAuthenticated() {
+  return canRedirectToAdminProducts();
+}
+
+export function isUsersCollectionAuth() {
+  return pb.authStore.record?.collectionName === 'users';
+}
+
+export async function requestPasswordReset(email) {
+  const url = `${window.location.origin}/admin/reset-password?token={TOKEN}`;
+  await pb.collection('users').requestPasswordReset(email.trim(), { url });
+}
+
+export async function confirmPasswordReset(token, password, passwordConfirm) {
+  await pb.collection('users').confirmPasswordReset(token, password, passwordConfirm);
+}
+
+export async function changeAdminPassword(oldPassword, password, passwordConfirm) {
+  const id = pb.authStore.record?.id;
+  if (!id || !isUsersCollectionAuth()) {
+    throw new Error('Password change is only available for user accounts.');
+  }
+  await pb.collection('users').update(id, {
+    oldPassword,
+    password,
+    passwordConfirm,
+  });
+}
+
+export function useAdminAuth() {
+  return useSyncExternalStore(
+    (onStoreChange) => pb.authStore.onChange(onStoreChange),
+    () => isAdminAuthenticated(),
+    () => false
+  );
+}
