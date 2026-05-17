@@ -17,11 +17,11 @@ const SettingsPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label>{t('admin.settings.siteName', 'Site Name')}</Label>
-            <Input defaultValue="FlexCart" />
+            <Input defaultValue="Smart Fashion" />
           </div>
           <div className="space-y-2">
             <Label>{t('admin.settings.contactEmail', 'Contact Email')}</Label>
-            <Input type="email" defaultValue="contact@flexcart.com" />
+            <Input type="email" defaultValue="contact@smartfashion.com" />
           </div>
           <div className="space-y-2">
             <Label>{t('admin.settings.currency', 'Currency')}</Label>

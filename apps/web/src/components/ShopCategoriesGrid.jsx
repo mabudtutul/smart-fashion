@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import pb from '@/lib/pocketbaseClient';
 
+import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
+
 const ShopCategoriesGrid = () => {
+  const { t } = useTranslationWithFallback();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,9 +59,9 @@ const ShopCategoriesGrid = () => {
   const displayCategories = categories.length > 0 ? categories : defaultCategories;
 
   return (
-    <div className="py-12 bg-gray-50">
+    <section id="shop-categories" className="relative z-0 py-12 bg-gray-50">
       <div className="container-custom mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Shop by categories</h2>
+        <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">{t('front.sections.shopByCategory', 'Shop by categories')}</h2>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {displayCategories.map((category, index) => {
@@ -66,9 +70,10 @@ const ShopCategoriesGrid = () => {
               : null;
             
             return (
-              <div 
+              <Link
                 key={category.id || index}
-                className="group cursor-pointer"
+                to={`/category/${encodeURIComponent(category.name)}`}
+                className="group relative z-0 block touch-manipulation rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF8C00] focus-visible:ring-offset-2"
               >
                 <div className={`aspect-square rounded-lg overflow-hidden mb-3 ${!imageUrl ? (category.color || 'bg-gray-200') : ''} relative`}>
                   {imageUrl ? (
@@ -84,7 +89,7 @@ const ShopCategoriesGrid = () => {
                   )}
                   
                   {/* Dot indicators */}
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 pointer-events-none" aria-hidden>
                     <div className="w-2 h-2 rounded-full bg-white/60"></div>
                     <div className="w-2 h-2 rounded-full bg-white"></div>
                     <div className="w-2 h-2 rounded-full bg-white/60"></div>
@@ -94,12 +99,12 @@ const ShopCategoriesGrid = () => {
                 <h3 className="text-sm font-medium text-center text-gray-900 group-hover:text-[#FF8C00] transition-colors duration-200">
                   {category.name}
                 </h3>
-              </div>
+              </Link>
             );
           })}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

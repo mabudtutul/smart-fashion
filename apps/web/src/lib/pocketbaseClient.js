@@ -1,6 +1,29 @@
 import PocketBase, { BaseAuthStore } from 'pocketbase';
 
-const POCKETBASE_API_URL = '/hcgi/platform';
+/**
+ * External PocketBase origin from VITE_POCKETBASE_URL (scheme + host, no trailing slash).
+ * SDK paths already include `/api/...` — do not append `/api` to this value.
+ */
+function normalizePocketBaseOrigin(url) {
+  let base = url.replace(/\/+$/, '');
+  if (base.endsWith('/api')) {
+    base = base.slice(0, -4);
+  }
+  return base;
+}
+
+export function resolvePocketBaseUrl() {
+  const configured = (import.meta.env.VITE_POCKETBASE_URL ?? '').trim();
+  if (!configured) {
+    throw new Error(
+      'VITE_POCKETBASE_URL is required (e.g. https://your-pocketbase-url.up.railway.app).'
+    );
+  }
+  return normalizePocketBaseOrigin(configured);
+}
+
+/** PocketBase host from VITE_POCKETBASE_URL — requests go to ${POCKETBASE_API_URL}/api/... */
+export const POCKETBASE_API_URL = resolvePocketBaseUrl();
 export const PB_AUTH_STORAGE_KEY = 'pb_auth_smartfashion_hcgi';
 
 export const pbAuthStore = new BaseAuthStore();
@@ -10,7 +33,9 @@ if (typeof window !== 'undefined') {
   window.__SMARTFASHION_PB__ = pb;
 }
 
-console.log('PB INSTANCE pocketbaseClient.js', pb);
+if (import.meta.env.DEV) {
+  console.log('[SmartFashion] PocketBase baseUrl', POCKETBASE_API_URL);
+}
 if (typeof window !== 'undefined') {
   console.log(
     '[SmartFashion auth] singleton pocketbaseClient',
@@ -111,6 +136,37 @@ export function getCapturedAuthToken() {
   return (window.__SMARTFASHION_LAST_AUTH_TOKEN__ || '').trim();
 }
 
+function isHtmlAuthPayload(rawText, response) {
+  const contentType = response?.headers?.get?.('content-type') || '';
+  if (contentType.includes('text/html')) return true;
+  const trimmed = (rawText || '').trimStart().slice(0, 32).toLowerCase();
+  return trimmed.startsWith('<!doctype') || trimmed.startsWith('<html');
+}
+
+function markAuthEndpointHtmlFailure(requestUrl, response, rawText) {
+  if (typeof window === 'undefined') return;
+  window.__SMARTFASHION_AUTH_HTML_RESPONSE__ = true;
+  console.error(
+    '[SmartFashion auth] auth endpoint returned HTML, not JSON — check VITE_POCKETBASE_URL',
+    {
+      url: String(requestUrl || ''),
+      status: response?.status,
+      baseUrl: POCKETBASE_API_URL,
+      snippet: (rawText || '').slice(0, 120),
+    }
+  );
+}
+
+export function didAuthEndpointReturnHtml() {
+  if (typeof window === 'undefined') return false;
+  return window.__SMARTFASHION_AUTH_HTML_RESPONSE__ === true;
+}
+
+export function clearAuthEndpointHtmlFlag() {
+  if (typeof window === 'undefined') return;
+  window.__SMARTFASHION_AUTH_HTML_RESPONSE__ = false;
+}
+
 async function captureAuthFromRawResponse(response, requestUrl) {
   const url = String(requestUrl || '');
   if (!AUTH_ENDPOINT_RE.test(url)) return;
@@ -122,6 +178,15 @@ async function captureAuthFromRawResponse(response, requestUrl) {
     rawText = await response.clone().text();
   } catch {
     /* body already consumed */
+  }
+
+  if (isHtmlAuthPayload(rawText, response)) {
+    markAuthEndpointHtmlFailure(requestUrl, response, rawText);
+    return;
+  }
+
+  if (typeof window !== 'undefined') {
+    window.__SMARTFASHION_AUTH_HTML_RESPONSE__ = false;
   }
 
   if (rawText) {
@@ -240,7 +305,7 @@ export function readPersistedAuthRaw() {
   }
 }
 
-/** Normalize PocketBase / HCGI auth-with-password payload → { token, model }. */
+/** Normalize PocketBase auth-with-password payload → { token, model }. */
 export function extractAuthSession(authData) {
   const raw =
     authData ??

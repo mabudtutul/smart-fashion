@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet';
+import { useLocation } from 'react-router-dom';
 import Header from '@/components/Header.jsx';
 import OrangeNavBar from '@/components/OrangeNavBar.jsx';
 import LeftSidebar from '@/components/LeftSidebar.jsx';
@@ -14,34 +15,52 @@ import BlogSection from '@/components/BlogSection.jsx';
 import Footer from '@/components/Footer.jsx';
 
 const HomePage = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const map = {
+      '#shop-categories': 'shop-categories',
+      '#blog': 'blog',
+      '#site-footer': 'site-footer'
+    };
+    const elId = map[location.hash];
+    if (!elId) return;
+    const id = window.setTimeout(() => {
+      document.getElementById(elId)?.scrollIntoView({ behavior: 'smooth' });
+    }, 80);
+    return () => window.clearTimeout(id);
+  }, [location.pathname, location.hash]);
+
   return (
     <>
       <Helmet>
-        <title>{`FlexCart - Your ultimate online shopping destination`}</title>
-        <meta name="description" content="Discover the latest fashion trends, electronics, and lifestyle products at FlexCart. Shop from top brands with exclusive deals and fast shipping." />
+        <title>Smart Fashion</title>
+        <meta name="description" content="Fashion and lifestyle in Dhaka. Shop online at Smart Fashion." />
       </Helmet>
       
       <div className="min-h-screen bg-white">
         <Header />
         <OrangeNavBar />
         
-        <div className="container-custom mx-auto px-4 py-6">
+        <div className="relative z-0 container-custom mx-auto px-4 py-6">
           <div className="flex gap-6">
             <LeftSidebar />
             
-            <div className="flex-1 overflow-hidden">
+            <div className="relative z-0 flex-1 overflow-hidden">
               <HeroSection />
             </div>
           </div>
         </div>
         
-        <FeaturedProductsCarousel />
         <ShopCategoriesGrid />
-        <PromotionalBanners />
-        <BestSellersCarousel />
-        <PromoBanners2Col />
         <NewProductsCarousel />
-        <BlogSection />
+        <FeaturedProductsCarousel />
+        <BestSellersCarousel />
+        <PromotionalBanners />
+        <PromoBanners2Col />
+        <div id="blog">
+          <BlogSection />
+        </div>
         
         <Footer />
       </div>

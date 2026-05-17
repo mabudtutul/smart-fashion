@@ -1,5 +1,39 @@
 {
   "admin": {
+    "login": {
+      "title": "Admin sign in",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "signingIn": "Signing in…",
+      "success": "Signed in",
+      "failed": "Sign in failed"
+    },
+    "logout": "Log out",
+    "password": {
+      "forgotLink": "Forgot password?",
+      "forgotTitle": "Forgot password",
+      "sendReset": "Send reset link",
+      "sending": "Sending…",
+      "resetEmailSent": "Reset link sent",
+      "resetEmailFailed": "Reset request failed",
+      "resetEmailHint": "Check your inbox for the reset link.",
+      "backToLogin": "Back to sign in",
+      "resetTitle": "New password",
+      "newPassword": "New password",
+      "oldPassword": "Current password",
+      "confirmPassword": "Confirm password",
+      "saveNew": "Save password",
+      "resetSuccess": "Password updated",
+      "resetFailed": "Password reset failed",
+      "invalidToken": "Invalid or missing reset token",
+      "mismatch": "Passwords do not match",
+      "changeTitle": "Change password",
+      "changeLink": "Password",
+      "changeSuccess": "Password changed",
+      "changeFailed": "Password change failed",
+      "superuserHint": "Change superuser passwords in the PocketBase admin panel."
+    },
     "nav": {
       "products": "Products",
       "orders": "Orders",
@@ -20,7 +54,19 @@
       "image": "Image",
       "featured": "Featured",
       "bestseller": "Bestseller",
-      "new": "New"
+      "new": "New",
+      "flags": "Homepage",
+      "discount": "Discount %",
+      "selectCategory": "Select category",
+      "loadFailed": "Could not load products",
+      "requiredFields": "Name, category, and price are required",
+      "imageRequired": "Image is required for new products",
+      "updated": "Product updated",
+      "created": "Product created",
+      "saveFailed": "Save failed",
+      "deleted": "Product deleted",
+      "deleteFailed": "Delete failed",
+      "deleteConfirm": "Delete this product?"
     },
     "orders": {
       "title": "Orders",
@@ -67,7 +113,7 @@
       "account": "Account",
       "cart": "Cart",
       "wishlist": "Wishlist",
-      "contact": "+1-800-123-4567"
+      "contact": "01345932726"
     },
     "nav": {
       "shopByCategory": "SHOP BY CATEGORIES",
@@ -79,18 +125,18 @@
       "recentPosts": "Recent Posts",
       "conditions": "Blogs & Conditions",
       "more": "More",
-      "get20": "Get 20%"
+      "get20": "Get 20%",
+      "scrollLabel": "Browse links — scroll sideways on small screens",
+      "previewSoon": "Coming soon"
     },
     "hero": {
-      "title": "STYLES.WEAR",
-      "subtitle": "New Brands Cloth Incoming",
       "shopNow": "Shop Now",
-      "backpackPromo": "Backpack",
-      "shoesPromo": "Shoes",
-      "newCollection": "New Collection",
-      "trendingNow": "Trending Now"
+      "prevSlide": "Previous slide",
+      "nextSlide": "Next slide",
+      "slideDot": "Slide {{n}}"
     },
     "sidebar": {
+      "aria": "Product categories",
       "clothing": "Clothing",
       "shoes": "Shoes",
       "jewelry": "Fashion Jewelry",
@@ -107,10 +153,30 @@
       "stock": "Stock",
       "addToCart": "Add to Cart",
       "description": "Description",
-      "rating": "Rating",
-      "reviews": "Reviews"
+      "view": "View product",
+      "notFound": "Product not found",
+      "backHome": "Back to home",
+      "newBadge": "NEW"
+    },
+    "category": {
+      "title": "Category",
+      "empty": "No products in this category yet.",
+      "loadError": "Could not load products."
+    },
+    "sections": {
+      "featured": "Featured products",
+      "bestsellers": "Best sellers",
+      "newProducts": "New products",
+      "shopByCategory": "Shop by categories",
+      "blog": "Latest from our blog",
+      "loadError": "Could not load this section. Try again later.",
+      "tryAgain": "Try again"
     },
     "cart": {
+      "title": "Cart",
+      "empty": "Your cart is empty.",
+      "add": "Add to cart",
+      "added": "added to cart",
       "items": "Cart Items",
       "quantity": "Quantity",
       "total": "Total",
@@ -131,6 +197,12 @@
       "logout": "Logout"
     },
     "footer": {
+      "support": "Support",
+      "customerService": "Customer service",
+      "trackOrder": "Track order",
+      "returns": "Returns",
+      "contactHeading": "Contact",
+      "policies": "Policies",
       "about": "About",
       "contact": "Contact",
       "categories": "Categories",
@@ -139,12 +211,21 @@
       "newsletterDesc": "Get the latest updates on new products and upcoming sales",
       "subscribe": "Subscribe",
       "enterEmail": "Enter your email",
-      "downloadApp": "Download our app",
+      "businessEmail": "smartfashion.site@gmail.com",
+      "businessPhone": "01345932726",
       "rights": "All rights reserved.",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "help": "Help",
-      "navigate": "Navigate"
+      "navigate": "Navigate",
+      "socialLabel": "Social links",
+      "tiktok": "TikTok",
+      "copyrightBrand": "Smart Fashion",
+      "proprietorLine": "Proprietor: Mohammad Hossain",
+      "locationLine": "Dhaka — Jamuna Future Park, Bangladesh",
+      "socialFacebook": "Facebook",
+      "socialInstagram": "Instagram",
+      "socialYoutube": "YouTube"
     },
     "blog": {
       "title": "Latest from our blog",
@@ -167,6 +248,7 @@
     "success": "Success",
     "error": "Error",
     "loading": "Loading...",
+    "saving": "Saving…",
     "noResults": "No Results",
     "back": "Back",
     "next": "Next",

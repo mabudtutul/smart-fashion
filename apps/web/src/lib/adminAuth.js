@@ -1,7 +1,9 @@
 import { useSyncExternalStore } from 'react';
 import pb, {
   canRedirectToAdminProducts,
+  clearAuthEndpointHtmlFlag,
   clearPersistedAuth,
+  didAuthEndpointReturnHtml,
   ensureStorageAccess,
   extractAuthSession,
   forcePersistAuthAfterLogin,
@@ -20,6 +22,7 @@ if (typeof window !== 'undefined') {
 /** Authenticate for admin CRUD (users collection first, then superuser). */
 export async function adminLogin(email, password) {
   await ensureStorageAccess();
+  clearAuthEndpointHtmlFlag();
 
   const collections = ['users', '_superusers'];
   let lastError;
@@ -63,6 +66,11 @@ export async function adminLogin(email, password) {
   console.log('[SmartFashion auth] sessionToken length', sessionToken.length);
 
   if (!sessionToken) {
+    if (didAuthEndpointReturnHtml()) {
+      throw new Error(
+        'Auth API returned HTML instead of JSON. Set VITE_POCKETBASE_URL to your external PocketBase host.'
+      );
+    }
     console.error('[SmartFashion auth] no token in response', {
       authData,
       raw: window.__SMARTFASHION_RAW_AUTH_RESPONSE__,

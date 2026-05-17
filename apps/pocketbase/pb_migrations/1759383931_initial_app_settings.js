@@ -2,8 +2,8 @@
 migrate((app) => {
     let settings = app.settings()
 
-    settings.meta.appName = "da7d55d7-4396-4d82-8c5b-069680062311.app-preview.com"
-    settings.meta.appURL = "https://da7d55d7-4396-4d82-8c5b-069680062311.app-preview.com/hcgi/platform"
+    settings.meta.appName = "Smart Fashion"
+    settings.meta.appURL = "https://smartfashion.site"
     settings.meta.hideControls = true
 
     settings.logs.maxDays = 7

@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductCard from '@/components/ProductCard.jsx';
 import pb from '@/lib/pocketbaseClient.js';
-import { toast } from 'sonner';
+
+import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 
 const BestSellersCarousel = () => {
+  const { t } = useTranslationWithFallback();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,24 +21,18 @@ const BestSellersCarousel = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('[BestSellers] Fetching products with filter: bestseller = true');
       const records = await pb.collection('products').getList(1, 10, {
         filter: 'bestseller = true',
         sort: '-created',
         $autoCancel: false
       });
-      console.log(`[BestSellers] Successfully fetched ${records.items.length} items`, records.items);
       setProducts(records.items);
     } catch (err) {
       console.error('[BestSellers] Error fetching bestsellers:', err);
-      setError('Failed to load best sellers. Please try again later.');
+      setError(t('front.sections.loadError', 'Could not load this section. Try again later.'));
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleAddToCart = (product) => {
-    toast.success(`${product.name} added to cart`);
   };
 
   const scroll = (direction) => {
@@ -77,8 +73,8 @@ const BestSellersCarousel = () => {
       <div className="py-12 bg-gray-50">
         <div className="container-custom mx-auto px-4 text-center">
           <p className="text-red-500 mb-4">{error}</p>
-          <Button onClick={fetchBestSellers} variant="outline">
-            Try Again
+          <Button onClick={fetchBestSellers} variant="outline" type="button" className="touch-manipulation">
+            {t('front.sections.tryAgain', 'Try again')}
           </Button>
         </div>
       </div>
@@ -93,7 +89,7 @@ const BestSellersCarousel = () => {
     <div className="py-12 bg-gray-50">
       <div className="container-custom mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Best sellers</h2>
+          <h2 className="text-3xl font-bold text-gray-900">{t('front.sections.bestsellers', 'Best sellers')}</h2>
           <div className="flex gap-2">
             <Button
               size="icon"
@@ -121,7 +117,7 @@ const BestSellersCarousel = () => {
         >
           {products.map((product) => (
             <div key={product.id} className="flex-none w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(20%-13px)]">
-              <ProductCard product={product} onAddToCart={handleAddToCart} />
+              <ProductCard product={product} />
             </div>
           ))}
         </div>

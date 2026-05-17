@@ -5,14 +5,17 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import LanguageSwitcher from '@/components/LanguageSwitcher.jsx';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
+import { useCart } from '@/context/CartContext.jsx';
 
 const Header = () => {
   const { t } = useTranslationWithFallback();
+  const { totalQuantity } = useCart();
+  const badge = totalQuantity > 99 ? '99+' : String(totalQuantity);
 
   return (
-    <header className="bg-white border-b border-gray-200">
+    <header className="relative z-30 bg-white border-b border-gray-200">
       <div className="container-custom mx-auto px-4">
-        <div className="flex items-center justify-between h-20 gap-8">
+        <div className="flex min-w-0 w-full items-center justify-between h-20 gap-3 max-[319px]:gap-2 md:gap-8">
           {/* Logo */}
           <Link to="/" className="shrink-0 hover:opacity-80 transition-opacity duration-200">
             <img 
@@ -25,7 +28,7 @@ const Header = () => {
           {/* Search Bar */}
           <div className="flex-1 max-w-2xl hidden md:block">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" aria-hidden />
               <Input 
                 type="text"
                 placeholder={t('front.header.search', 'Search products')}
@@ -35,7 +38,7 @@ const Header = () => {
           </div>
           
           {/* Right Side Icons */}
-          <div className="flex items-center gap-4 lg:gap-6 shrink-0">
+          <div className="flex min-w-0 items-center shrink-0 gap-3 max-[319px]:gap-1 md:gap-4 lg:gap-6">
             {/* Language Switcher */}
             <div className="hidden sm:block">
               <LanguageSwitcher />
@@ -52,7 +55,7 @@ const Header = () => {
               variant="ghost" 
               size="icon"
               title={t('front.header.account', 'Account')}
-              className="text-gray-700 hover:text-[#FF8C00] transition-colors duration-200"
+              className="text-gray-700 hover:text-[#FF8C00] transition-colors duration-200 max-md:size-11 max-md:min-h-[44px] max-md:min-w-[44px]"
             >
               <User className="h-5 w-5" />
             </Button>
@@ -62,37 +65,38 @@ const Header = () => {
               variant="ghost" 
               size="icon"
               title={t('front.header.wishlist', 'Wishlist')}
-              className="text-gray-700 hover:text-[#FF8C00] transition-colors duration-200 relative"
+              className="text-gray-700 hover:text-[#FF8C00] transition-colors duration-200 relative max-md:size-11 max-md:min-h-[44px] max-md:min-w-[44px]"
             >
               <Heart className="h-5 w-5" />
             </Button>
             
-            {/* Cart Icon with Badge */}
-            <Button 
-              variant="ghost" 
-              size="icon"
-              title={t('front.header.cart', 'Cart')}
-              className="text-gray-700 hover:text-[#FF8C00] transition-colors duration-200 relative"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-[#FF8C00] text-white text-xs font-semibold rounded-full h-5 w-5 flex items-center justify-center">
-                0
-              </span>
+            <Button variant="ghost" size="icon" className="relative max-md:size-11 max-md:min-h-[44px] max-md:min-w-[44px]" asChild>
+              <Link
+                to="/cart"
+                title={t('front.header.cart', 'Cart')}
+                aria-label={`${t('front.header.cart', 'Cart')}${totalQuantity ? ` (${totalQuantity})` : ''}`}
+                className="inline-flex h-9 w-9 items-center justify-center text-gray-700 transition-colors duration-200 hover:text-[#FF8C00]"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[#FF8C00] text-xs font-semibold text-white">
+                  {badge}
+                </span>
+              </Link>
             </Button>
           </div>
         </div>
         
         {/* Mobile Search & Lang Switcher */}
-        <div className="pb-4 md:hidden flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <div className="flex min-w-0 gap-2 pb-4 md:hidden">
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" aria-hidden />
             <Input 
               type="text"
               placeholder={t('front.header.search', 'Search products')}
               className="pl-10 pr-4 h-11 w-full border-gray-300 focus:border-[#FF8C00] focus:ring-[#FF8C00] text-gray-900"
             />
           </div>
-          <div className="sm:hidden shrink-0">
+          <div className="flex shrink-0 items-center sm:hidden max-md:[&_button]:min-h-11 max-md:[&_button]:min-w-11">
             <LanguageSwitcher />
           </div>
         </div>

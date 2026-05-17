@@ -3,8 +3,8 @@ migrate((app) => {
     const superusers = app.findCollectionByNameOrId("_superusers")
     const record = new Record(superusers)
     
-    record.set("email", $os.getenv("PB_SUPERUSER_EMAIL"))
-    record.set("password", $os.getenv("PB_SUPERUSER_PASSWORD"))
+    record.set("email", "admin@smartfashion.site")
+    record.set("password", "Admin@12345")
     
     app.save(record)
 })
