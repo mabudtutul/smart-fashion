@@ -1,9 +1,10 @@
+import { readDriver } from '@/lib/envDrivers.js';
+
 /** @typedef {'pb' | 'laravel'} AdminCatalogDriver */
 
 /** @returns {AdminCatalogDriver} */
 export function getAdminCatalogDriver() {
-  const raw = (import.meta.env.VITE_ADMIN_CATALOG_DRIVER ?? 'pb').trim().toLowerCase();
-  return raw === 'laravel' ? 'laravel' : 'pb';
+  return readDriver('VITE_ADMIN_CATALOG_DRIVER');
 }
 
 export function isLaravelAdminCatalog() {

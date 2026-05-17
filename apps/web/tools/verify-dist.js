@@ -31,12 +31,6 @@ if (!fs.existsSync(assetsDir)) {
 const jsFiles = fs.readdirSync(assetsDir).filter((f) => f.endsWith('.js'));
 const cssFiles = fs.readdirSync(assetsDir).filter((f) => f.endsWith('.css'));
 
-if (jsFiles.length !== 1) {
-  fail(`expected exactly 1 JS bundle, found ${jsFiles.length}: ${jsFiles.join(', ')}`);
-}
-if (cssFiles.length !== 1) {
-  fail(`expected exactly 1 CSS bundle, found ${cssFiles.length}: ${cssFiles.join(', ')}`);
-}
 if (!jsFiles.includes(jsInHtml)) {
   fail(`index.html references ${jsInHtml} but assets has ${jsFiles.join(', ')}`);
 }
@@ -44,10 +38,23 @@ if (!cssFiles.includes(cssInHtml)) {
   fail(`index.html references ${cssInHtml} but assets has ${cssFiles.join(', ')}`);
 }
 
-const bundle = fs.readFileSync(path.join(assetsDir, jsInHtml), 'utf8');
+const bundle = jsFiles.map((f) => fs.readFileSync(path.join(assetsDir, f), 'utf8')).join('\n');
 if (bundle.includes('hcgi/platform')) {
   fail('bundle still contains hcgi/platform — rebuild from current source');
 }
+
+if (bundle.includes('railway.app') || bundle.includes('abc.up.railway')) {
+  fail('bundle still contains Railway PocketBase URL — rebuild with apps/web/.env.production');
+}
+
+const apiUrl = (process.env.VITE_API_BASE_URL || '').trim();
+if (apiUrl) {
+  const host = apiUrl.replace(/\/+$/, '').replace(/^https?:\/\//, '');
+  if (host && !bundle.includes(host)) {
+    fail(`bundle missing VITE_API_BASE_URL host "${host}" — check .env.production`);
+  }
+}
+
 const pbUrl = (process.env.VITE_POCKETBASE_URL || '').trim();
 if (pbUrl) {
   const host = pbUrl.replace(/\/+$/, '').replace(/\/api$/, '').replace(/^https?:\/\//, '');

@@ -1,11 +1,12 @@
+import { readDriver } from '@/lib/envDrivers.js';
+
 /** @typedef {'pb' | 'laravel'} AdminMediaDriver */
 
 export const LARAVEL_ADMIN_TOKEN_KEY = 'sf_laravel_admin_token_v1';
 
 /** @returns {AdminMediaDriver} */
 export function getAdminMediaDriver() {
-  const raw = (import.meta.env.VITE_ADMIN_MEDIA_DRIVER ?? 'pb').trim().toLowerCase();
-  return raw === 'laravel' ? 'laravel' : 'pb';
+  return readDriver('VITE_ADMIN_MEDIA_DRIVER');
 }
 
 export function isLaravelAdminMedia() {

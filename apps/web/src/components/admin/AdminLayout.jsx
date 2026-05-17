@@ -1,41 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { adminLogout } from '@/lib/adminAuth.js';
-import {
-  canRedirectToAdminProducts,
-  initializePocketBaseAuth,
-} from '@/lib/pocketbaseClient.js';
+import { adminLogout, isAdminAuthenticated, useAdminAuth } from '@/lib/adminAuth.js';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 
 const navLinkClass = ({ isActive }) =>
   `px-3 py-2 text-sm rounded-md ${isActive ? 'bg-[#FF8C00] text-white' : 'text-gray-700 hover:bg-gray-100'}`;
 
-/** Set true only for emergency upload session without auth. */
-const TEMP_ADMIN_AUTH_BYPASS = false;
-
 const AdminLayout = () => {
   const navigate = useNavigate();
   const { t } = useTranslationWithFallback();
-  const [authReady, setAuthReady] = useState(false);
-  const [sessionOk, setSessionOk] = useState(false);
+  const authed = useAdminAuth();
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    initializePocketBaseAuth();
-    const ok = TEMP_ADMIN_AUTH_BYPASS || canRedirectToAdminProducts();
-    setSessionOk(ok);
-    setAuthReady(true);
-
-    if (!TEMP_ADMIN_AUTH_BYPASS && !ok) {
+    const ok = authed || isAdminAuthenticated();
+    setChecked(true);
+    if (!ok) {
       navigate('/admin/login', { replace: true });
     }
-  }, [navigate]);
+  }, [authed, navigate]);
 
-  if (!TEMP_ADMIN_AUTH_BYPASS && !authReady) {
+  if (!checked) {
     return null;
   }
 
-  if (!TEMP_ADMIN_AUTH_BYPASS && !sessionOk) {
+  if (!authed && !isAdminAuthenticated()) {
     return null;
   }
 

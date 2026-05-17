@@ -4,22 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { adminLogin, useAdminAuth } from '@/lib/adminAuth.js';
-import pb, {
-  canRedirectToAdminProducts,
-  initializePocketBaseAuth,
-  PB_AUTH_STORAGE_KEY,
-} from '@/lib/pocketbaseClient.js';
+import { adminLogin, isAdminAuthenticated, useAdminAuth } from '@/lib/adminAuth.js';
+import { isLaravelAdminAuth } from '@/lib/backendConfig.js';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 import { toast } from 'sonner';
-
-console.log('PB INSTANCE AdminLogin.jsx', pb);
-if (typeof window !== 'undefined') {
-  console.log(
-    '[SmartFashion auth] singleton AdminLogin',
-    pb === window.__SMARTFASHION_PB__
-  );
-}
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -31,8 +19,7 @@ const AdminLogin = () => {
   const authed = useAdminAuth();
 
   useEffect(() => {
-    initializePocketBaseAuth();
-    if (canRedirectToAdminProducts()) {
+    if (authed || isAdminAuthenticated()) {
       navigate('/admin/products', { replace: true });
     }
   }, [authed, navigate]);
@@ -43,13 +30,8 @@ const AdminLogin = () => {
     try {
       await adminLogin(email.trim(), password);
 
-      const stored = window.localStorage.getItem(PB_AUTH_STORAGE_KEY);
-      const valid = canRedirectToAdminProducts();
-
-      console.log('[SmartFashion auth] pre-redirect stored', stored, 'canRedirect', valid);
-
-      if (!stored || !valid) {
-        throw new Error('Login succeeded but auth was not persisted.');
+      if (!isAdminAuthenticated()) {
+        throw new Error('Login succeeded but session was not saved.');
       }
 
       toast.success(t('admin.login.success', 'সাইন ইন সফল'));
@@ -108,11 +90,17 @@ const AdminLogin = () => {
         >
           {loading ? t('admin.login.signingIn', 'সাইন ইন হচ্ছে…') : t('admin.login.submit', 'সাইন ইন')}
         </Button>
-        <p className="text-center text-sm">
-          <Link to="/admin/forgot-password" className="text-[#FF8C00] hover:underline">
-            {t('admin.password.forgotLink', 'পাসওয়ার্ড ভুলে গেছেন?')}
-          </Link>
-        </p>
+        {isLaravelAdminAuth() ? (
+          <p className="text-center text-xs text-gray-500">
+            {t('admin.login.laravelHint', 'Uses api.smartfashion.site admin account')}
+          </p>
+        ) : (
+          <p className="text-center text-sm">
+            <Link to="/admin/forgot-password" className="text-[#FF8C00] hover:underline">
+              {t('admin.password.forgotLink', 'পাসওয়ার্ড ভুলে গেছেন?')}
+            </Link>
+          </p>
+        )}
       </form>
     </div>
   );

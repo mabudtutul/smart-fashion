@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { requestPasswordReset } from '@/lib/adminAuth.js';
+import { isLaravelAdminAuth } from '@/lib/backendConfig.js';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 import { toast } from 'sonner';
 
@@ -12,6 +13,19 @@ const AdminForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+
+  if (isLaravelAdminAuth()) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-sm bg-white rounded-lg shadow-sm border p-6 space-y-4 text-center text-sm text-gray-600">
+          <p>{t('admin.password.laravelUnavailable', 'Password reset is managed on the server. Contact your administrator.')}</p>
+          <Link to="/admin/login" className="text-[#FF8C00] hover:underline">
+            {t('admin.password.backToLogin', 'সাইন ইন-এ ফিরে যান')}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

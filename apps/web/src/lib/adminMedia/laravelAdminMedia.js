@@ -20,6 +20,19 @@ export function setLaravelAdminToken(token) {
   }
 }
 
+/** Remove stale PocketBase/Railway session keys after Laravel login. */
+export function clearLegacyPocketBaseAuth() {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem('pb_auth_smartfashion_hcgi');
+    localStorage.removeItem('pocketbase_auth');
+    sessionStorage.removeItem('pb_auth_smartfashion_hcgi');
+    sessionStorage.removeItem('pocketbase_auth');
+  } catch {
+    /* ignore */
+  }
+}
+
 export async function loginLaravelAdmin(email, password) {
   const response = await fetch(apiUrl('/auth/login'), {
     method: 'POST',

@@ -1,34 +1,38 @@
 import { useSyncExternalStore } from 'react';
 import { isLaravelAdminAuth } from '@/lib/backendConfig.js';
 import { notifyAdminAuthChange, subscribeAdminAuth } from '@/lib/adminAuthStore.js';
-import { clearAdminMediaSession, ensureLaravelMediaAuth } from '@/lib/adminMedia/index.js';
+import { clearAdminMediaSession } from '@/lib/adminMedia/index.js';
 import {
+  clearLegacyPocketBaseAuth,
   getLaravelAdminToken,
   loginLaravelAdmin,
 } from '@/lib/adminMedia/laravelAdminMedia.js';
-import pb, {
-  canRedirectToAdminProducts,
-  clearAuthEndpointHtmlFlag,
-  clearPersistedAuth,
-  didAuthEndpointReturnHtml,
-  ensureStorageAccess,
-  extractAuthSession,
-  forcePersistAuthAfterLogin,
-  getCapturedAuthToken,
-  hasLocalStorageAuthKey,
-  isPocketBaseConfigured,
-} from '@/lib/pocketbaseClient.js';
 
-/** Authenticate for admin CRUD — Laravel Sanctum or PocketBase legacy. */
+/** Authenticate admin against Laravel Sanctum (production) or legacy PocketBase. */
 export async function adminLogin(email, password) {
   if (isLaravelAdminAuth()) {
+    clearLegacyPocketBaseAuth();
     await loginLaravelAdmin(email, password);
     notifyAdminAuthChange();
     return true;
   }
 
+  const pocketbase = await import('@/lib/pocketbaseClient.js');
+  const {
+    default: pb,
+    canRedirectToAdminProducts,
+    clearAuthEndpointHtmlFlag,
+    didAuthEndpointReturnHtml,
+    ensureStorageAccess,
+    extractAuthSession,
+    forcePersistAuthAfterLogin,
+    getCapturedAuthToken,
+    hasLocalStorageAuthKey,
+    isPocketBaseConfigured,
+  } = pocketbase;
+
   if (!isPocketBaseConfigured()) {
-    throw new Error('PocketBase is not configured. Set VITE_POCKETBASE_URL or use Laravel admin drivers.');
+    throw new Error('PocketBase is not configured. Set Laravel admin drivers or VITE_POCKETBASE_URL.');
   }
 
   await ensureStorageAccess();
@@ -62,22 +66,17 @@ export async function adminLogin(email, password) {
       const refreshedSession = extractAuthSession(refreshed);
       token = refreshedSession.token || getCapturedAuthToken() || token;
       model = refreshedSession.model ?? model;
-    } catch (err) {
-      if (import.meta.env.DEV) {
-        console.warn('[SmartFashion auth] authRefresh after login failed', err);
-      }
+    } catch {
+      /* ignore */
     }
   }
 
   const sessionToken = (token || getCapturedAuthToken() || pb.authStore.token || '').trim();
-  const sessionModel =
-    model ?? pb.authStore.record ?? pb.authStore.model ?? null;
+  const sessionModel = model ?? pb.authStore.record ?? pb.authStore.model ?? null;
 
   if (!sessionToken) {
     if (didAuthEndpointReturnHtml()) {
-      throw new Error(
-        'Auth API returned HTML instead of JSON. Set VITE_POCKETBASE_URL to your external PocketBase host.'
-      );
+      throw new Error('Auth API returned HTML instead of JSON. Check VITE_POCKETBASE_URL.');
     }
     throw new Error('Login succeeded but auth was not persisted.');
   }
@@ -94,14 +93,6 @@ export async function adminLogin(email, password) {
     throw new Error('Login succeeded but auth was not persisted.');
   }
 
-  try {
-    await ensureLaravelMediaAuth(email, password);
-  } catch (err) {
-    if (import.meta.env.DEV) {
-      console.warn('[SmartFashion] Laravel media auth bridge failed', err);
-    }
-  }
-
   notifyAdminAuthChange();
   return true;
 }
@@ -109,13 +100,16 @@ export async function adminLogin(email, password) {
 export function adminLogout() {
   if (isLaravelAdminAuth()) {
     clearAdminMediaSession();
+    clearLegacyPocketBaseAuth();
     notifyAdminAuthChange();
     return;
   }
 
-  clearPersistedAuth();
-  clearAdminMediaSession();
-  notifyAdminAuthChange();
+  import('@/lib/pocketbaseClient.js').then(({ clearPersistedAuth }) => {
+    clearPersistedAuth();
+    clearAdminMediaSession();
+    notifyAdminAuthChange();
+  });
 }
 
 export function isAdminAuthenticated() {
@@ -123,41 +117,62 @@ export function isAdminAuthenticated() {
     return Boolean(getLaravelAdminToken());
   }
 
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  try {
+    const raw =
+      window.localStorage.getItem('pb_auth_smartfashion_hcgi') ||
+      window.localStorage.getItem('pocketbase_auth');
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    return Boolean(parsed?.token);
+  } catch {
+    return false;
+  }
+}
+
+export async function isAdminAuthenticatedAsync() {
+  if (isLaravelAdminAuth()) {
+    return Boolean(getLaravelAdminToken());
+  }
+
+  const { canRedirectToAdminProducts } = await import('@/lib/pocketbaseClient.js');
   return canRedirectToAdminProducts();
 }
 
 export function isUsersCollectionAuth() {
-  if (isLaravelAdminAuth()) {
-    return true;
-  }
-
-  return pb.authStore.record?.collectionName === 'users';
+  return isLaravelAdminAuth();
 }
 
 export async function requestPasswordReset(email) {
   if (isLaravelAdminAuth()) {
-    throw new Error('Password reset is not available for Laravel admin yet.');
+    throw new Error('Password reset is not available yet. Contact your site administrator.');
   }
 
+  const { default: pb } = await import('@/lib/pocketbaseClient.js');
   const url = `${window.location.origin}/admin/reset-password?token={TOKEN}`;
   await pb.collection('users').requestPasswordReset(email.trim(), { url });
 }
 
 export async function confirmPasswordReset(token, password, passwordConfirm) {
   if (isLaravelAdminAuth()) {
-    throw new Error('Password reset is not available for Laravel admin yet.');
+    throw new Error('Password reset is not available yet.');
   }
 
+  const { default: pb } = await import('@/lib/pocketbaseClient.js');
   await pb.collection('users').confirmPasswordReset(token, password, passwordConfirm);
 }
 
 export async function changeAdminPassword(oldPassword, password, passwordConfirm) {
   if (isLaravelAdminAuth()) {
-    throw new Error('Password change is not available for Laravel admin yet.');
+    throw new Error('Password change via the dashboard is not available yet. Use Hostinger or artisan.');
   }
 
+  const { default: pb } = await import('@/lib/pocketbaseClient.js');
   const id = pb.authStore.record?.id;
-  if (!id || !isUsersCollectionAuth()) {
+  if (!id || pb.authStore.record?.collectionName !== 'users') {
     throw new Error('Password change is only available for user accounts.');
   }
   await pb.collection('users').update(id, {
@@ -172,13 +187,5 @@ function getAdminAuthSnapshot() {
 }
 
 export function useAdminAuth() {
-  if (isLaravelAdminAuth()) {
-    return useSyncExternalStore(subscribeAdminAuth, getAdminAuthSnapshot, () => false);
-  }
-
-  return useSyncExternalStore(
-    (onStoreChange) => pb.authStore.onChange(onStoreChange),
-    getAdminAuthSnapshot,
-    () => false
-  );
+  return useSyncExternalStore(subscribeAdminAuth, getAdminAuthSnapshot, () => false);
 }

@@ -1,9 +1,10 @@
+import { readDriver } from '@/lib/envDrivers.js';
+
 /** @typedef {'pb' | 'laravel'} CatalogBackendDriver */
 
 /** @returns {CatalogBackendDriver} */
 export function getBackendDriver() {
-  const raw = (import.meta.env.VITE_BACKEND_DRIVER ?? 'pb').trim().toLowerCase();
-  return raw === 'laravel' ? 'laravel' : 'pb';
+  return readDriver('VITE_BACKEND_DRIVER');
 }
 
 export function isLaravelCatalog() {
