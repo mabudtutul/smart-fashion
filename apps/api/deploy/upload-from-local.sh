@@ -19,12 +19,16 @@ rsync -avz --delete \
   --exclude-from="${SCRIPT_DIR}/rsync-exclude.txt" \
   "${API_ROOT}/" "${SSH_TARGET}:${PRIVATE}/"
 
-echo "→ Sync public bootstrap (index.php, .htaccess, uploads guards)"
-rsync -avz \
-  "${API_ROOT}/public/.htaccess" \
-  "${SSH_TARGET}:${PUBLIC}/.htaccess"
+echo "→ Sync Hostinger public routing (docroot + public_html/api/)"
+ssh "${SSH_TARGET}" "mkdir -p ${PUBLIC}/api ${PUBLIC}/uploads/products ${PUBLIC}/uploads/categories"
 
+scp "${SCRIPT_DIR}/hostinger-bootstrap.php" "${SSH_TARGET}:${PUBLIC}/hostinger-bootstrap.php"
 scp "${SCRIPT_DIR}/hostinger-public-index.php" "${SSH_TARGET}:${PUBLIC}/index.php"
+scp "${SCRIPT_DIR}/hostinger-public-htaccess" "${SSH_TARGET}:${PUBLIC}/.htaccess"
+
+scp "${SCRIPT_DIR}/hostinger-bootstrap.php" "${SSH_TARGET}:${PUBLIC}/api/hostinger-bootstrap.php"
+scp "${SCRIPT_DIR}/hostinger-public-api-index.php" "${SSH_TARGET}:${PUBLIC}/api/index.php"
+scp "${SCRIPT_DIR}/hostinger-public-api-htaccess" "${SSH_TARGET}:${PUBLIC}/api/.htaccess"
 
 rsync -avz \
   "${API_ROOT}/public/uploads/.htaccess" \
@@ -32,6 +36,4 @@ rsync -avz \
   "${API_ROOT}/public/uploads/categories/.gitignore" \
   "${SSH_TARGET}:${PUBLIC}/uploads/"
 
-ssh "${SSH_TARGET}" "mkdir -p ${PUBLIC}/uploads/products ${PUBLIC}/uploads/categories"
-
-echo "Done. SSH in and run: cd ~/${PRIVATE} && bash deploy/server-install.sh"
+echo "Done. SSH: cd ~/${PRIVATE} && bash deploy/apply-hostinger-routing.sh"

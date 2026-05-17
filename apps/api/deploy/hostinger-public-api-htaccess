@@ -1,0 +1,10 @@
+# public_html/api/.htaccess — route /api/v1/* through Laravel when /api is a real directory
+<IfModule mod_rewrite.c>
+    Options -MultiViews -Indexes
+    RewriteEngine On
+    RewriteBase /api/
+
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>

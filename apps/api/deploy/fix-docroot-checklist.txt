@@ -1,7 +1,27 @@
-api.smartfashion.site returns HTML/404 for /api/v1/* — fix on Hostinger:
+HOSTINGER API ROUTING HOTFIX (api.smartfashion.site)
+====================================================
 
-1. public_html/index.php must bootstrap ../private/smartfashion-api (see hostinger-public-index.php)
-2. public_html/.htaccess must rewrite to index.php
-3. APP_URL=https://api.smartfashion.site in .env
-4. php artisan route:cache && config:cache
-5. Re-run: STAGING_API=https://api.smartfashion.site bash deploy/smoke-staging.sh
+ROOT CAUSE (common): public_html/api/ exists as a folder, so /api/v1/* never
+reaches Laravel. Fix: install index.php + .htaccess inside public_html/api/.
+
+ON SERVER (SSH):
+  cd ~/domains/api.smartfashion.site/private/smartfashion-api
+  git pull
+  bash deploy/apply-hostinger-routing.sh
+
+MANUAL (if no git):
+  Copy deploy/hostinger-* to public_html per apply-hostinger-routing.sh
+
+VERIFY:
+  curl -sS -H 'Accept: application/json' https://api.smartfashion.site/up
+  curl -sS -H 'Accept: application/json' 'https://api.smartfashion.site/api/v1/categories?perPage=1'
+  curl -sS -H 'Accept: application/json' 'https://api.smartfashion.site/api/v1/products?perPage=1'
+
+EXPECT: JSON (not HTML). /up => {"status":"ok"} or similar.
+
+SMOKE:
+  STAGING_API=https://api.smartfashion.site ADMIN_PASSWORD='***' bash deploy/smoke-staging.sh
+
+.env:
+  APP_URL=https://api.smartfashion.site
+  APP_DEBUG=false
