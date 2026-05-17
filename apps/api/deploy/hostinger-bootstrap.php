@@ -25,6 +25,43 @@ function smartfashion_hostinger_app_root(): string
     exit;
 }
 
+/**
+ * Hostinger public_html/api/index.php strips the /api URL prefix from PATH_INFO.
+ * Laravel registers API routes as /api/v1/* — rewrite the path before routing.
+ */
+function smartfashion_normalize_api_request_uri(): void
+{
+    $uri = $_SERVER['REQUEST_URI'] ?? '/';
+    $path = parse_url($uri, PHP_URL_PATH) ?? '/';
+    $path = '/'.trim($path, '/');
+    if ($path === '/') {
+        return;
+    }
+
+    $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+    $fromApiFrontController = str_contains($scriptName, '/api/index.php')
+        || str_contains($scriptName, '/api/');
+
+    $needsApiPrefix = $fromApiFrontController
+        && preg_match('#^/v1(?:/|$)#', $path)
+        && ! str_starts_with($path, '/api/');
+
+    if (! $needsApiPrefix) {
+        return;
+    }
+
+    $query = parse_url($uri, PHP_URL_QUERY);
+    $fixedPath = '/api'.$path;
+    $_SERVER['REQUEST_URI'] = $fixedPath.($query ? '?'.$query : '');
+
+    if (isset($_SERVER['PATH_INFO']) && is_string($_SERVER['PATH_INFO'])) {
+        $pathInfo = '/'.trim($_SERVER['PATH_INFO'], '/');
+        if (preg_match('#^/v1(?:/|$)#', $pathInfo)) {
+            $_SERVER['PATH_INFO'] = '/api'.$pathInfo;
+        }
+    }
+}
+
 function smartfashion_hostinger_handle_request(): void
 {
     $appRoot = smartfashion_hostinger_app_root();
@@ -34,6 +71,8 @@ function smartfashion_hostinger_handle_request(): void
     }
 
     require $appRoot.'/vendor/autoload.php';
+
+    smartfashion_normalize_api_request_uri();
 
     $app = require_once $appRoot.'/bootstrap/app.php';
 

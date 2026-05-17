@@ -34,9 +34,14 @@ cd "${APP_DIR}"
 php artisan config:clear 2>/dev/null || true
 php artisan route:clear 2>/dev/null || true
 php artisan config:cache
-php artisan route:cache
+
+echo ""
+echo "Registered API routes (expect api/v1/categories, api/v1/products):"
+php artisan route:list --path=api/v1 --columns=method,uri,name 2>/dev/null | head -20 || php artisan route:list | head -30
 
 echo ""
 echo "Applied. Verify:"
 echo "  curl -sS -H 'Accept: application/json' https://api.smartfashion.site/up"
 echo "  curl -sS -H 'Accept: application/json' 'https://api.smartfashion.site/api/v1/categories?perPage=1'"
+echo ""
+echo "Note: route:cache skipped — use route:clear after route changes on Hostinger."

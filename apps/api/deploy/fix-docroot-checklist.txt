@@ -19,6 +19,11 @@ VERIFY:
 
 EXPECT: JSON (not HTML). /up => {"status":"ok"} or similar.
 
+API 404 (Laravel boots, routes 404):
+  php artisan route:clear
+  bash deploy/apply-hostinger-routing.sh   # copies URI fix + route:list
+  bash deploy/verify-api-routes.sh
+
 SMOKE:
   STAGING_API=https://api.smartfashion.site ADMIN_PASSWORD='***' bash deploy/smoke-staging.sh
 
