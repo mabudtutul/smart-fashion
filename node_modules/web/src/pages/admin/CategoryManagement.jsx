@@ -11,9 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { adminCatalog, isLaravelAdminCatalog } from '@/lib/adminCatalog/index.js';
 import { afterCategorySaved, enrichAdminList, isLaravelAdminMedia } from '@/lib/adminMedia/index.js';
 import { getRecordImageUrl } from '@/lib/catalog/index.js';
-import pb from '@/lib/pocketbaseClient.js';
 import { toast } from 'sonner';
 
 const emptyForm = { name: '', description: '' };
@@ -31,7 +31,7 @@ const CategoryManagement = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await pb.collection('categories').getList(1, 100, { sort: 'name' });
+      const res = await adminCatalog.listCategories(1, 100, { sort: 'name' });
       setCategories(enrichAdminList(res.items));
     } catch (err) {
       toast.error(err?.message || t('admin.categories.loadFailed', 'ক্যাটাগরি লোড করা যায়নি'));
@@ -74,16 +74,16 @@ const CategoryManagement = () => {
         name: form.name.trim(),
         description: form.description.trim(),
       };
-      if (imageFile && !isLaravelAdminMedia()) {
+      if (imageFile && !isLaravelAdminCatalog()) {
         payload.image = imageFile;
       }
 
       let record;
       if (editing) {
-        record = await pb.collection('categories').update(editing.id, payload);
+        record = await adminCatalog.updateCategory(editing.id, payload);
         toast.success(t('admin.categories.updated', 'ক্যাটাগরি আপডেট হয়েছে'));
       } else {
-        record = await pb.collection('categories').create(payload);
+        record = await adminCatalog.createCategory(payload);
         toast.success(t('admin.categories.created', 'ক্যাটাগরি যোগ হয়েছে'));
       }
 
@@ -93,7 +93,7 @@ const CategoryManagement = () => {
             id: 'category-image-upload',
           });
         }
-        await afterCategorySaved(record, imageFile);
+        record = await afterCategorySaved(record, imageFile);
         toast.dismiss('category-image-upload');
       }
 
@@ -109,7 +109,7 @@ const CategoryManagement = () => {
   const handleDelete = async (category) => {
     if (!window.confirm(t('admin.categories.deleteConfirm', 'এই ক্যাটাগরিটি মুছবেন?'))) return;
     try {
-      await pb.collection('categories').delete(category.id);
+      await adminCatalog.deleteCategory(category.id);
       toast.success(t('admin.categories.deleted', 'ক্যাটাগরি মুছে ফেলা হয়েছে'));
       load();
     } catch (err) {
