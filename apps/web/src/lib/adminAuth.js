@@ -5,6 +5,7 @@ import pb, {
   ensureStorageAccess,
   extractAuthSession,
   forcePersistAuthAfterLogin,
+  getCapturedAuthToken,
   hasLocalStorageAuthKey,
 } from '@/lib/pocketbaseClient.js';
 
@@ -41,20 +42,21 @@ export async function adminLogin(email, password) {
   }
 
   let { token, model } = extractAuthSession(authData);
+  token = token || getCapturedAuthToken();
 
   if (!token && authedCollection) {
     try {
       const refreshed = await pb.collection(authedCollection).authRefresh();
       console.log('[SmartFashion auth] RAW authRefresh', refreshed);
       const refreshedSession = extractAuthSession(refreshed);
-      token = refreshedSession.token || token;
+      token = refreshedSession.token || getCapturedAuthToken() || token;
       model = refreshedSession.model ?? model;
     } catch (err) {
       console.warn('[SmartFashion auth] authRefresh after login failed', err);
     }
   }
 
-  const sessionToken = (token || pb.authStore.token || '').trim();
+  const sessionToken = (token || getCapturedAuthToken() || pb.authStore.token || '').trim();
   const sessionModel =
     model ?? pb.authStore.record ?? pb.authStore.model ?? null;
 
@@ -64,9 +66,14 @@ export async function adminLogin(email, password) {
     console.error('[SmartFashion auth] no token in response', {
       authData,
       raw: window.__SMARTFASHION_RAW_AUTH_RESPONSE__,
+      captured: getCapturedAuthToken(),
       storeToken: pb.authStore.token,
     });
     throw new Error('Login succeeded but auth was not persisted.');
+  }
+
+  if (!pb.authStore.token) {
+    pb.authStore.save(sessionToken, sessionModel);
   }
 
   if (!forcePersistAuthAfterLogin(sessionToken, sessionModel)) {

@@ -27,6 +27,9 @@ function isAuthRecord(value) {
   );
 }
 
+const AUTH_ENDPOINT_RE = /\/auth-(with-password|refresh)(?:\?|$)/i;
+const JWT_RE = /eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/;
+
 /** Read token only from explicit auth fields — never from record.id/email. */
 function readTokenFromPayload(payload) {
   if (!payload || typeof payload !== 'object') return '';
@@ -35,12 +38,18 @@ function readTokenFromPayload(payload) {
     payload.token,
     payload.accessToken,
     payload.access_token,
+    payload.auth_token,
+    payload.sessionToken,
+    payload.session_token,
     payload.jwt,
     payload.authToken,
     payload.data?.token,
     payload.data?.accessToken,
+    payload.data?.access_token,
     payload.auth?.token,
     payload.meta?.token,
+    payload.result?.token,
+    payload.result?.accessToken,
   ];
 
   for (const value of candidates) {
@@ -52,22 +61,141 @@ function readTokenFromPayload(payload) {
   return '';
 }
 
+function readAuthTokenFromHeaders(response) {
+  if (!response?.headers?.get) return '';
+  const names = ['Authorization', 'authorization', 'X-Auth-Token', 'x-auth-token'];
+  for (const name of names) {
+    const raw = response.headers.get(name);
+    if (typeof raw === 'string' && raw.trim()) {
+      return raw.replace(/^Bearer\s+/i, '').trim();
+    }
+  }
+  return '';
+}
+
+function extractJwtFromText(text) {
+  if (typeof text !== 'string' || !text) return '';
+  const match = text.match(JWT_RE);
+  return match ? match[0] : '';
+}
+
+function readTokenFromPayloadDeep(payload, depth = 0) {
+  if (!payload || depth > 6) return '';
+  if (typeof payload === 'string') {
+    const direct = payload.trim();
+    if (direct.split('.').length === 3 && direct.length > 20) return direct;
+    return extractJwtFromText(direct);
+  }
+  if (typeof payload !== 'object') return '';
+
+  const shallow = readTokenFromPayload(payload);
+  if (shallow) return shallow;
+
+  for (const value of Object.values(payload)) {
+    const found = readTokenFromPayloadDeep(value, depth + 1);
+    if (found) return found;
+  }
+  return '';
+}
+
+function stashCapturedAuthToken(token, rawPayload) {
+  if (typeof window === 'undefined' || !token) return;
+  window.__SMARTFASHION_LAST_AUTH_TOKEN__ = token;
+  if (rawPayload && typeof rawPayload === 'object') {
+    window.__SMARTFASHION_RAW_AUTH_RESPONSE__ = rawPayload;
+  }
+}
+
+export function getCapturedAuthToken() {
+  if (typeof window === 'undefined') return '';
+  return (window.__SMARTFASHION_LAST_AUTH_TOKEN__ || '').trim();
+}
+
+async function captureAuthFromRawResponse(response, requestUrl) {
+  const url = String(requestUrl || '');
+  if (!AUTH_ENDPOINT_RE.test(url)) return;
+
+  let rawText = '';
+  let payload = null;
+
+  try {
+    rawText = await response.clone().text();
+  } catch {
+    /* body already consumed */
+  }
+
+  if (rawText) {
+    try {
+      payload = JSON.parse(rawText);
+    } catch {
+      payload = null;
+    }
+    if (payload && typeof payload === 'string') {
+      try {
+        payload = JSON.parse(payload);
+      } catch {
+        payload = null;
+      }
+    }
+    if (payload && typeof payload === 'object') {
+      if (typeof window !== 'undefined') {
+        window.__SMARTFASHION_RAW_AUTH_RESPONSE__ = payload;
+      }
+    }
+  }
+
+  const headerToken = readAuthTokenFromHeaders(response);
+  const bodyToken =
+    readTokenFromPayload(payload) ||
+    readTokenFromPayloadDeep(payload) ||
+    extractJwtFromText(rawText);
+  const token = (headerToken || bodyToken).trim();
+
+  if (token) {
+    stashCapturedAuthToken(token, payload);
+  }
+}
+
+function installRawAuthFetchCapture(client) {
+  if (typeof fetch === 'undefined') return;
+  const nativeFetch = fetch.bind(globalThis);
+
+  client.beforeSend = (url, options) => {
+    const sendOptions = options || {};
+    const upstreamFetch = sendOptions.fetch || nativeFetch;
+
+    sendOptions.fetch = async (requestUrl, init) => {
+      const response = await upstreamFetch(requestUrl, init);
+      try {
+        await captureAuthFromRawResponse(response, requestUrl);
+      } catch {
+        /* non-fatal */
+      }
+      return response;
+    };
+
+    return { url, options: sendOptions };
+  };
+}
+
+installRawAuthFetchCapture(pb);
+
 pb.afterSend = (response, data) => {
-  if (data && typeof data === 'object') {
+  if (data && typeof data === 'object' && typeof window !== 'undefined') {
     window.__SMARTFASHION_RAW_AUTH_RESPONSE__ = data;
   }
 
-  const headerToken =
-    response?.headers?.get?.('Authorization')?.replace(/^Bearer\s+/i, '') ||
-    response?.headers?.get?.('X-Auth-Token') ||
-    response?.headers?.get?.('x-auth-token') ||
-    '';
+  const headerToken = readAuthTokenFromHeaders(response);
+  const bodyToken = readTokenFromPayload(data) || readTokenFromPayloadDeep(data);
+  const captured =
+    typeof window !== 'undefined' ? getCapturedAuthToken() : '';
+  const token = (captured || headerToken || bodyToken).trim();
 
-  const bodyToken = readTokenFromPayload(data);
-  const token = (headerToken || bodyToken).trim();
-
-  if (token && typeof window !== 'undefined') {
-    window.__SMARTFASHION_LAST_AUTH_TOKEN__ = token;
+  if (token) {
+    stashCapturedAuthToken(token, data);
+    if (data && typeof data === 'object' && !readTokenFromPayload(data)) {
+      data.token = token;
+    }
   }
 
   return data;
@@ -118,7 +246,7 @@ export function extractAuthSession(authData) {
     authData ??
     (typeof window !== 'undefined' ? window.__SMARTFASHION_RAW_AUTH_RESPONSE__ : null);
 
-  let token = readTokenFromPayload(raw);
+  let token = readTokenFromPayload(raw) || readTokenFromPayloadDeep(raw);
   let model = null;
 
   if (raw && typeof raw === 'object') {
@@ -134,8 +262,8 @@ export function extractAuthSession(authData) {
     }
   }
 
-  if (!token && typeof window !== 'undefined') {
-    token = (window.__SMARTFASHION_LAST_AUTH_TOKEN__ || '').trim();
+  if (!token) {
+    token = getCapturedAuthToken();
   }
 
   if (!token) {
