@@ -3,7 +3,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import BlogCard from '@/components/BlogCard';
-import pb from '@/lib/pocketbaseClient';
+import { isPocketBaseConfigured } from '@/lib/pocketbaseClient.js';
+import pb from '@/lib/pocketbaseClient.js';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 
 const BlogSection = () => {
@@ -16,6 +17,12 @@ const BlogSection = () => {
   }, []);
 
   const fetchBlogPosts = async () => {
+    if (!isPocketBaseConfigured()) {
+      setPosts([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const records = await pb.collection('blog_posts').getList(1, 8, {
