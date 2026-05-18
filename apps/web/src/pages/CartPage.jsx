@@ -31,7 +31,8 @@ const CartPage = () => {
             </Button>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
+          <>
+          <ul className="divide-y divide-gray-200 rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
             {lines.map((line) => {
               const unit =
                 (line.discount || 0) > 0 ? line.price - (line.price * (line.discount || 0)) / 100 : line.price;
@@ -58,6 +59,25 @@ const CartPage = () => {
               );
             })}
           </ul>
+          <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-orange-100 bg-orange-50/50 px-5 py-4">
+            <p className="text-sm text-slate-600">
+              {t('front.cart.items', 'মোট আইটেম')}: <span className="font-semibold text-slate-900">{totalQuantity}</span>
+            </p>
+            <p className="text-lg font-bold text-[#FF8C00]">
+              {t('front.cart.total', 'মোট')}:{' '}
+              {formatPrice(
+                lines.reduce((sum, line) => {
+                  const unit =
+                    (line.discount || 0) > 0
+                      ? line.price - (line.price * (line.discount || 0)) / 100
+                      : line.price;
+                  return sum + unit * line.quantity;
+                }, 0),
+                i18n.language
+              )}
+            </p>
+          </div>
+          </>
         )}
       </div>
       <Footer />

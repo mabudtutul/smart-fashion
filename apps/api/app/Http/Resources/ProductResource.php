@@ -23,6 +23,7 @@ class ProductResource extends JsonResource
             'price' => $this->price,
             'category' => $this->category,
             'image' => PublicUploadUrl::basename($this->image_path),
+            'image_path' => $this->image_path,
             'image_url' => $imageUrl,
             'image_urls' => $imageUrls,
             'rating' => $this->rating,

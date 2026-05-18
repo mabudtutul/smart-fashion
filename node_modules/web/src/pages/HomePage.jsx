@@ -38,7 +38,7 @@ const HomePage = () => {
         <meta name="description" content="Fashion and lifestyle in Dhaka. Shop online at Smart Fashion." />
       </Helmet>
       
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen overflow-x-clip bg-white">
         <Header />
         <OrangeNavBar />
         

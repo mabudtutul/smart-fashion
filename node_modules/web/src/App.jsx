@@ -14,11 +14,13 @@ import AdminLogin from './pages/admin/AdminLogin.jsx';
 import AdminForgotPassword from './pages/admin/AdminForgotPassword.jsx';
 import AdminResetPassword from './pages/admin/AdminResetPassword.jsx';
 import AdminChangePassword from './pages/admin/AdminChangePassword.jsx';
+import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import ProductManagement from './pages/admin/ProductManagement.jsx';
 import OrderManagement from './pages/admin/OrderManagement.jsx';
 import CategoryManagement from './pages/admin/CategoryManagement.jsx';
 import UserManagement from './pages/admin/UserManagement.jsx';
 import SettingsPage from './pages/admin/SettingsPage.jsx';
+import HomepageManagement from './pages/admin/HomepageManagement.jsx';
 
 function App() {
   return (
@@ -36,11 +38,12 @@ function App() {
           <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
           <Route path="/admin/reset-password" element={<AdminResetPassword />} />
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="/admin/products" replace />} />
+            <Route index element={<AdminDashboard />} />
             <Route path="products" element={<ProductManagement />} />
             <Route path="change-password" element={<AdminChangePassword />} />
             <Route path="orders" element={<OrderManagement />} />
             <Route path="categories" element={<CategoryManagement />} />
+            <Route path="homepage" element={<HomepageManagement />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>

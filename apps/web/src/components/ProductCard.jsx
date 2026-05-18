@@ -2,8 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getRecordImageUrl } from '@/lib/catalog';
-import { CATALOG_IMAGE_PLACEHOLDER } from '@/utils/catalogPlaceholder.js';
+import CatalogImage from '@/components/CatalogImage.jsx';
 import { formatPrice } from '@/utils/formatPrice.js';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 import { useCart } from '@/context/CartContext.jsx';
@@ -12,8 +11,6 @@ import { toast } from 'sonner';
 const ProductCard = ({ product }) => {
   const { i18n, t } = useTranslationWithFallback();
   const { addItem } = useCart();
-
-  const imageUrl = getRecordImageUrl(product, { thumb: '300x300' }) ?? CATALOG_IMAGE_PLACEHOLDER;
 
   const discountedPrice = product.discount ? product.price - (product.price * product.discount) / 100 : product.price;
 
@@ -29,22 +26,18 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div className="group relative rounded-lg bg-white transition-all duration-300 hover:shadow-lg">
+    <div className="group relative flex h-full flex-col rounded-2xl border border-slate-100/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
       <Link
         to={detailTo}
-        className="block overflow-hidden rounded-t-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF8C00] focus-visible:ring-offset-2"
+        className="block shrink-0 overflow-hidden rounded-t-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF8C00] focus-visible:ring-offset-2"
         aria-label={`${product.name} — ${t('front.product.view', 'View product')}`}
       >
-        <div className="relative aspect-square overflow-hidden bg-gray-100">
-          <img
-            src={imageUrl}
+        <div className="relative aspect-[4/5] overflow-hidden bg-slate-100 sm:aspect-square">
+          <CatalogImage
+            record={product}
+            imageOptions={{ thumb: '300x300' }}
             alt={product.name}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = CATALOG_IMAGE_PLACEHOLDER;
-            }}
+            className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
           />
           {product.discount > 0 && (
             <div className="absolute left-3 top-3 rounded bg-yellow-400 px-2 py-1 text-xs font-semibold text-black">
@@ -59,7 +52,7 @@ const ProductCard = ({ product }) => {
         </div>
       </Link>
 
-      <div className="p-4">
+      <div className="mt-auto flex flex-1 flex-col p-4 sm:p-5">
         <Link
           to={detailTo}
           className="mb-2 block min-h-[2.5rem] rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF8C00] focus-visible:ring-offset-1"

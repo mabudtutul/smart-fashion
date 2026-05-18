@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
-import { catalog, catalogErrorMessage, getRecordImageUrl } from '@/lib/catalog';
+import CatalogImage from '@/components/CatalogImage.jsx';
+import { catalog, catalogErrorMessage } from '@/lib/catalog';
 
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 
@@ -19,7 +20,7 @@ const ShopCategoriesGrid = () => {
     try {
       setLoading(true);
       setLoadError(null);
-      const records = await catalog.listCategories(1, 6, { sort: '-created' });
+      const records = await catalog.listCategories(1, 6, { sort: 'sort_order' });
       setCategories(records.items ?? []);
     } catch (err) {
       if (import.meta.env.DEV) console.error('Error fetching categories:', err);
@@ -35,7 +36,7 @@ const ShopCategoriesGrid = () => {
       <div className="py-12 bg-gray-50">
         <div className="container-custom mx-auto px-4">
           <Skeleton className="h-8 w-64 mb-8 mx-auto" />
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="space-y-3">
                 <Skeleton className="aspect-square rounded-lg" />
@@ -60,9 +61,11 @@ const ShopCategoriesGrid = () => {
   const displayCategories = categories.length > 0 ? categories : defaultCategories;
 
   return (
-    <section id="shop-categories" className="relative z-0 py-12 bg-gray-50">
+    <section id="shop-categories" className="relative z-0 overflow-x-clip bg-gray-50 py-10 sm:py-12">
       <div className="container-custom mx-auto px-4">
-        <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">{t('front.sections.shopByCategory', 'Shop by categories')}</h2>
+        <h2 className="mb-6 text-center text-2xl font-bold text-gray-900 sm:mb-8 sm:text-3xl">
+          {t('front.sections.shopByCategory', 'Shop by categories')}
+        </h2>
 
         {loadError ? (
           <p className="mb-4 text-center text-sm text-amber-700" role="status">
@@ -70,25 +73,28 @@ const ShopCategoriesGrid = () => {
           </p>
         ) : null}
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
           {displayCategories.map((category, index) => {
-            const imageUrl = getRecordImageUrl(category, { thumb: '300x300' });
+            const hasImage = Boolean(category.image || category.image_url || category.image_path);
             
             return (
               <Link
                 key={category.id || index}
                 to={`/category/${encodeURIComponent(category.name)}`}
-                className="group relative z-0 block touch-manipulation rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF8C00] focus-visible:ring-offset-2"
+                className="group relative z-0 block touch-manipulation rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF8C00] focus-visible:ring-offset-2"
               >
-                <div className={`aspect-square rounded-lg overflow-hidden mb-3 ${!imageUrl ? (category.color || 'bg-gray-200') : ''} relative`}>
-                  {imageUrl ? (
-                    <img 
-                      src={imageUrl}
+                <div
+                  className={`relative mb-2 aspect-square overflow-hidden rounded-xl border border-slate-100 bg-slate-100 sm:mb-3 ${!hasImage ? category.color || 'bg-gray-200' : ''}`}
+                >
+                  {hasImage ? (
+                    <CatalogImage
+                      record={category}
+                      imageOptions={{ thumb: '300x300', size: 'banner' }}
                       alt={category.name}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
+                    <div className="flex h-full w-full items-center justify-center">
                       <span className="text-4xl opacity-20">👗</span>
                     </div>
                   )}

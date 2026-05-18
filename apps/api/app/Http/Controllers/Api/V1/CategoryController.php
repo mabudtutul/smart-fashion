@@ -16,12 +16,18 @@ class CategoryController extends Controller
         $perPage = min((int) $request->query('perPage', $request->query('per_page', 30)), 100);
         $page = max((int) $request->query('page', 1), 1);
 
-        $sort = $request->query('sort', '-created');
+        $sort = $request->query('sort', 'sort_order');
         $direction = str_starts_with((string) $sort, '-') ? 'desc' : 'asc';
-        $column = ltrim((string) $sort, '-') === 'name' ? 'name' : 'created_at';
+        $field = ltrim((string) $sort, '-');
+        $column = match ($field) {
+            'name' => 'name',
+            'created' => 'created_at',
+            default => 'sort_order',
+        };
 
         $paginator = Category::query()
             ->orderBy($column, $direction)
+            ->orderBy('name')
             ->paginate($perPage, ['*'], 'page', $page);
 
         return PocketBasePaginator::response(

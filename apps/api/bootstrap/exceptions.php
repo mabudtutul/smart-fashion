@@ -32,16 +32,44 @@ return function ($exceptions): void {
         ], 401);
     });
 
+    $exceptions->render(function (ValidationException $e, Request $request) {
+        if (! $request->is('api/*')) {
+            return null;
+        }
+
+        $first = collect($e->errors())->flatten()->first();
+
+        return response()->json([
+            'message' => $first ? (string) $first : 'Validation failed.',
+            'errors' => $e->errors(),
+        ], 422);
+    });
+
     $exceptions->render(function (Throwable $e, Request $request) {
-        if (! $request->is('api/*') || $e instanceof ValidationException) {
+        if (! $request->is('api/*')) {
             return null;
         }
 
         $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
-        $payload = ['message' => $status >= 500 ? 'Server error.' : $e->getMessage()];
+        $isUpload = str_contains($request->path(), '/image');
 
-        if (config('app.debug') && $status >= 500) {
+        $message = $status >= 500
+            ? ($isUpload
+                ? 'Image upload failed on the server.'
+                : 'Server error.')
+            : $e->getMessage();
+
+        $payload = ['message' => $message];
+
+        if ($status >= 500 && $isUpload) {
+            $payload['hint'] = 'Verify UPLOADS_ROOT, public_html/uploads permissions, and PHP GD/WebP on Hostinger.';
+        }
+
+        if (config('app.debug')) {
             $payload['exception'] = class_basename($e);
+            if ($status >= 500) {
+                $payload['debug'] = $e->getMessage();
+            }
         }
 
         return response()->json($payload, $status);

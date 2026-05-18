@@ -1,13 +1,13 @@
 /**
- * Vite driver flags: explicit env wins; production builds default to Laravel.
+ * Laravel-only driver resolution (PocketBase driver removed Phase 2).
  * @param {string} envKey e.g. VITE_BACKEND_DRIVER
  */
 export function readDriver(envKey) {
   const raw = (import.meta.env[envKey] ?? '').trim().toLowerCase();
-  if (raw === 'laravel' || raw === 'pb') {
-    return raw;
+  if (raw === 'pb' && import.meta.env.DEV) {
+    console.warn(`[SmartFashion] ${envKey}=pb is no longer supported; using laravel.`);
   }
-  return import.meta.env.PROD ? 'laravel' : 'pb';
+  return 'laravel';
 }
 
 export function isLaravelDriver(envKey) {

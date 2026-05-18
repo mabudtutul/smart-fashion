@@ -1,25 +1,14 @@
-import { resolveApiV1Base } from '@/lib/catalog/config.js';
-import { fetchCatalogJson, normalizeListPayload } from '@/lib/catalog/catalogHttp.js';
-
-function v1Url(path, query = {}) {
-  const url = new URL(path, `${resolveApiV1Base()}/`);
-  Object.entries(query).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      url.searchParams.set(key, String(value));
-    }
-  });
-  return url.toString();
-}
+import { PUBLIC_PATHS } from '@/lib/api/endpoints.js';
+import { getPublicJson } from '@/lib/api/publicClient.js';
+import { normalizeListPayload } from '@/lib/api/parse.js';
 
 export const laravelCatalog = {
   async listCategories(page, perPage, options = {}) {
-    const data = await fetchCatalogJson(
-      v1Url('/categories', {
-        page,
-        perPage,
-        sort: options.sort,
-      })
-    );
+    const data = await getPublicJson(PUBLIC_PATHS.categories, {
+      page,
+      perPage,
+      sort: options.sort,
+    });
     return normalizeListPayload(data);
   },
 
@@ -43,11 +32,11 @@ export const laravelCatalog = {
       query.new = 'true';
     }
 
-    const data = await fetchCatalogJson(v1Url('/products', query));
+    const data = await getPublicJson(PUBLIC_PATHS.products, query);
     return normalizeListPayload(data);
   },
 
   async getProduct(id) {
-    return fetchCatalogJson(v1Url(`/products/${encodeURIComponent(id)}`));
+    return getPublicJson(PUBLIC_PATHS.product(id));
   },
 };

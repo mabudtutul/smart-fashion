@@ -1,12 +1,8 @@
-import { isLaravelAdminCatalog } from '@/lib/adminCatalog/config.js';
-import { isLaravelAdminMedia } from '@/lib/adminMedia/config.js';
 import {
   deleteCategoryImage,
   deleteProductImage,
   loginLaravelAdmin,
   setLaravelAdminToken,
-  syncCategoryToLaravel,
-  syncProductToLaravel,
   uploadCategoryImage,
   uploadProductImage,
 } from '@/lib/adminMedia/laravelAdminMedia.js';
@@ -24,17 +20,10 @@ export {
 export { cacheLaravelMediaMeta } from '@/lib/adminMedia/mediaCache.js';
 
 export async function ensureLaravelMediaAuth(email, password) {
-  if (!isLaravelAdminMedia()) return;
   await loginLaravelAdmin(email, password);
 }
 
 export async function afterProductSaved(record, imageFile, options = {}) {
-  if (!isLaravelAdminMedia()) return record;
-
-  if (!isLaravelAdminCatalog()) {
-    await syncProductToLaravel(record);
-  }
-
   if (imageFile) {
     const result = await uploadProductImage(record.id, imageFile, {
       ...options,
@@ -54,12 +43,6 @@ export async function afterProductSaved(record, imageFile, options = {}) {
 }
 
 export async function afterCategorySaved(record, imageFile, options = {}) {
-  if (!isLaravelAdminMedia()) return record;
-
-  if (!isLaravelAdminCatalog()) {
-    await syncCategoryToLaravel(record);
-  }
-
   if (imageFile) {
     const result = await uploadCategoryImage(record.id, imageFile, {
       ...options,
@@ -79,10 +62,7 @@ export async function afterCategorySaved(record, imageFile, options = {}) {
 }
 
 export function enrichAdminList(items) {
-  if (isLaravelAdminCatalog() || isLaravelAdminMedia()) {
-    return applyLaravelMediaCache(items);
-  }
-  return items;
+  return applyLaravelMediaCache(items);
 }
 
 export function clearAdminMediaSession() {

@@ -85,10 +85,10 @@ const BestSellersCarousel = () => {
   }
 
   return (
-    <div className="py-12 bg-gray-50">
+    <section className="overflow-x-clip bg-gray-50 py-10 sm:py-12">
       <div className="container-custom mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">{t('front.sections.bestsellers', 'Best sellers')}</h2>
+        <div className="mb-6 flex items-center justify-between sm:mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">{t('front.sections.bestsellers', 'Best sellers')}</h2>
           <div className="flex gap-2">
             <Button
               size="icon"
@@ -109,19 +109,18 @@ const BestSellersCarousel = () => {
           </div>
         </div>
         
-        <div 
+        <div
           id="bestsellers-scroll"
-          className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="catalog-carousel-track scrollbar-hide -mx-4 scroll-smooth px-4 sm:mx-0 sm:px-0"
         >
           {products.map((product) => (
-            <div key={product.id} className="flex-none w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(20%-13px)]">
+            <div key={product.id} className="catalog-carousel-item">
               <ProductCard product={product} />
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

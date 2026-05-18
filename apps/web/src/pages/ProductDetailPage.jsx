@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import Header from '@/components/Header.jsx';
 import OrangeNavBar from '@/components/OrangeNavBar.jsx';
 import Footer from '@/components/Footer.jsx';
-import { catalog, getRecordImageUrl } from '@/lib/catalog';
-import { CATALOG_IMAGE_PLACEHOLDER } from '@/utils/catalogPlaceholder.js';
+import CatalogImage from '@/components/CatalogImage.jsx';
+import { catalog } from '@/lib/catalog';
 import { formatPrice } from '@/utils/formatPrice.js';
 import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.js';
 import { useCart } from '@/context/CartContext.jsx';
@@ -49,8 +49,6 @@ const ProductDetailPage = () => {
       cancelled = true;
     };
   }, [id]);
-
-  const imageUrl = getRecordImageUrl(product, { thumb: '600x600' }) ?? CATALOG_IMAGE_PLACEHOLDER;
 
   const discounted =
     product && product.discount > 0
@@ -113,15 +111,13 @@ const ProductDetailPage = () => {
           ← {t('front.product.backHome', 'Back to home')}
         </Link>
         <div className="grid gap-10 md:grid-cols-2">
-          <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
-            <img
-              src={imageUrl}
+          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-100 sm:aspect-square">
+            <CatalogImage
+              record={product}
+              imageOptions={{ thumb: '600x600' }}
               alt={product.name}
+              loading="eager"
               className="h-full w-full object-cover object-center"
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = CATALOG_IMAGE_PLACEHOLDER;
-              }}
             />
           </div>
           <div className="flex min-w-0 flex-col">

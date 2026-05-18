@@ -3,39 +3,46 @@ import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback.j
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { adminGlassCard, adminPageClass, adminPrimaryBtn, adminInputClass } from '@/components/admin/adminUi.js';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader.jsx';
 
 const SettingsPage = () => {
   const { t } = useTranslationWithFallback();
 
   return (
-    <div className="p-6 max-w-3xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">{t('admin.settings.title', 'Site Settings')}</h1>
-      </div>
+    <div className={adminPageClass}>
+      <AdminPageHeader
+        title={t('admin.settings.title', 'সাইট সেটিংস')}
+        subtitle={t('admin.settings.subtitle', 'স্টোরের সাধারণ কনফিগারেশন')}
+      />
 
-      <div className="bg-white rounded-lg shadow-sm border p-6 space-y-6">
+      <div className={`${adminGlassCard} p-6 sm:p-8 max-w-3xl space-y-6`}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label>{t('admin.settings.siteName', 'Site Name')}</Label>
-            <Input defaultValue="Smart Fashion" />
+            <Label>{t('admin.settings.siteName', 'সাইটের নাম')}</Label>
+            <Input className={adminInputClass} defaultValue="Smart Fashion" />
           </div>
           <div className="space-y-2">
-            <Label>{t('admin.settings.contactEmail', 'Contact Email')}</Label>
-            <Input type="email" defaultValue="contact@smartfashion.com" />
+            <Label>{t('admin.settings.contactEmail', 'যোগাযোগ ইমেইল')}</Label>
+            <Input type="email" className={adminInputClass} defaultValue="contact@smartfashion.com" />
           </div>
           <div className="space-y-2">
-            <Label>{t('admin.settings.currency', 'Currency')}</Label>
-            <Input defaultValue="USD" />
+            <Label>{t('admin.settings.currency', 'মুদ্রা')}</Label>
+            <Input className={adminInputClass} defaultValue="BDT (৳)" readOnly />
           </div>
           <div className="space-y-2">
-            <Label>{t('admin.settings.taxRate', 'Tax Rate (%)')}</Label>
-            <Input type="number" defaultValue="8" />
+            <Label>{t('admin.settings.taxRate', 'ট্যাক্স (%)')}</Label>
+            <Input type="number" className={adminInputClass} defaultValue="0" />
           </div>
         </div>
 
-        <div className="pt-4 flex justify-end">
-          <Button className="bg-[#FF8C00] hover:bg-[#FF8C00]/90">
-            {t('common.save', 'Save')}
+        <p className="text-xs text-slate-500">
+          {t('admin.settings.comingSoon', 'সেটিংস সংরক্ষণ শীঘ্রই সক্রিয় হবে।')}
+        </p>
+
+        <div className="pt-2 flex justify-end">
+          <Button type="button" className={adminPrimaryBtn} disabled>
+            {t('common.save', 'সংরক্ষণ')}
           </Button>
         </div>
       </div>

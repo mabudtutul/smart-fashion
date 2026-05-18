@@ -12,7 +12,8 @@ DEPLOY="${APP_DIR}/deploy"
 echo "Domain root: ${DOMAIN_ROOT}"
 echo "Public:      ${PUBLIC}"
 
-mkdir -p "${PUBLIC}/uploads/products" "${PUBLIC}/uploads/categories" "${API_PUBLIC}"
+mkdir -p "${PUBLIC}/uploads/products" "${PUBLIC}/uploads/categories" \
+  "${PUBLIC}/uploads/homepage/hero" "${PUBLIC}/uploads/homepage/banners" "${API_PUBLIC}"
 
 cp "${DEPLOY}/hostinger-public-index.php" "${PUBLIC}/index.php"
 cp "${DEPLOY}/hostinger-public-htaccess" "${PUBLIC}/.htaccess"
@@ -30,9 +31,34 @@ if [[ -f "${APP_DIR}/public/.htaccess" ]] && [[ ! -f "${PUBLIC}/.htaccess" ]]; t
   cp "${APP_DIR}/public/.htaccess" "${PUBLIC}/.htaccess"
 fi
 
+APP_UPLOADS="${APP_DIR}/public/uploads"
+mkdir -p "${PUBLIC}/uploads/products" "${PUBLIC}/uploads/categories"
+
+if [[ -L "${APP_UPLOADS}" ]]; then
+  echo "Uploads symlink already present: ${APP_UPLOADS}"
+elif [[ -d "${APP_UPLOADS}" ]] && [[ -n "$(ls -A "${APP_UPLOADS}" 2>/dev/null || true)" ]]; then
+  echo "→ Syncing existing app uploads to public_html/uploads"
+  cp -a "${APP_UPLOADS}/." "${PUBLIC}/uploads/" 2>/dev/null || true
+  rm -rf "${APP_UPLOADS}"
+  ln -sfn "${PUBLIC}/uploads" "${APP_UPLOADS}"
+else
+  rm -rf "${APP_UPLOADS}" 2>/dev/null || true
+  ln -sfn "${PUBLIC}/uploads" "${APP_UPLOADS}"
+fi
+
+ENV_FILE="${APP_DIR}/.env"
+if [[ -f "${ENV_FILE}" ]]; then
+  if grep -q '^UPLOADS_ROOT=' "${ENV_FILE}"; then
+    sed -i.bak "s|^UPLOADS_ROOT=.*|UPLOADS_ROOT=${PUBLIC}/uploads|" "${ENV_FILE}" && rm -f "${ENV_FILE}.bak"
+  else
+    echo "UPLOADS_ROOT=${PUBLIC}/uploads" >> "${ENV_FILE}"
+  fi
+fi
+
 cd "${APP_DIR}"
 php artisan config:clear 2>/dev/null || true
 php artisan route:clear 2>/dev/null || true
+php artisan optimize:clear 2>/dev/null || true
 php artisan config:cache
 
 echo ""

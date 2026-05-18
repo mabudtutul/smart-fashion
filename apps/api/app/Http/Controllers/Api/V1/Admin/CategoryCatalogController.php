@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Concerns\HandlesAdminIdempotency;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CategoryCatalogRequest;
 use App\Http\Resources\CategoryResource;
@@ -13,6 +14,8 @@ use Illuminate\Http\Request;
 
 class CategoryCatalogController extends Controller
 {
+    use HandlesAdminIdempotency;
+
     public function index(Request $request): JsonResponse
     {
         return app(CategoryController::class)->index($request);
@@ -25,9 +28,11 @@ class CategoryCatalogController extends Controller
 
     public function store(CategoryCatalogRequest $request): JsonResponse
     {
-        $category = Category::query()->create($request->catalogAttributes());
+        return $this->idempotentJson($request, 'admin.categories.store', function () use ($request) {
+            $category = Category::query()->create($request->catalogAttributes());
 
-        return response()->json(new CategoryResource($category), 201);
+            return response()->json(new CategoryResource($category), 201);
+        });
     }
 
     public function update(CategoryCatalogRequest $request, Category $category): JsonResponse

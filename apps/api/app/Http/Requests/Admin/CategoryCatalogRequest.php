@@ -27,6 +27,7 @@ class CategoryCatalogRequest extends FormRequest
                 ),
             ],
             'description' => ['nullable', 'string'],
+            'sort_order' => ['sometimes', 'integer', 'min:0', 'max:9999'],
         ];
     }
 
@@ -38,6 +39,7 @@ class CategoryCatalogRequest extends FormRequest
         return [
             'name' => $data['name'],
             'description' => $data['description'] ?? '',
+            'sort_order' => (int) ($data['sort_order'] ?? 0),
         ];
     }
 }

@@ -16,7 +16,15 @@ class Category extends Model
         'name',
         'description',
         'image_path',
+        'sort_order',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'sort_order' => 'integer',
+        ];
+    }
 
     protected static function booted(): void
     {

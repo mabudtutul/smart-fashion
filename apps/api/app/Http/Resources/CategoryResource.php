@@ -21,8 +21,10 @@ class CategoryResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description ?? '',
             'image' => PublicUploadUrl::basename($this->image_path),
+            'image_path' => $this->image_path,
             'image_url' => $imageUrl,
             'image_urls' => $imageUrls,
+            'sort_order' => (int) ($this->sort_order ?? 0),
             'created' => $this->created_at?->toIso8601String(),
             'updated' => $this->updated_at?->toIso8601String(),
         ];

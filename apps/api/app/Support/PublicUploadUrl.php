@@ -49,7 +49,7 @@ final class PublicUploadUrl
 
         $prefix = "products/{$productId}";
 
-        return self::variantMap($prefix, ['main', 'card', 'thumb']);
+        return self::variantMap($prefix, ['main', 'card', 'thumb'], $imagePath);
     }
 
     /** @return array<string, string>|null */
@@ -61,22 +61,37 @@ final class PublicUploadUrl
 
         $prefix = "categories/{$categoryId}";
 
-        return self::variantMap($prefix, ['banner', 'thumb']);
+        return self::variantMap($prefix, ['banner', 'thumb'], $imagePath);
     }
 
     /**
+     * Prefer files found on disk; otherwise emit canonical variant URLs from image_path.
+     *
      * @param  list<string>  $names
      * @return array<string, string>|null
      */
-    private static function variantMap(string $prefix, array $names): ?array
+    private static function variantMap(string $prefix, array $names, ?string $imagePath = null): ?array
     {
         $urls = [];
+        $extFromPath = $imagePath
+            ? strtolower(pathinfo($imagePath, PATHINFO_EXTENSION) ?: 'webp')
+            : 'webp';
 
         foreach ($names as $name) {
-            $relative = "{$prefix}/{$name}.webp";
-            if (is_file(public_path('uploads/'.$relative))) {
+            $found = UploadsPath::findVariantFile($prefix, $name);
+            if ($found !== null) {
+                [$relative] = $found;
                 $urls[$name] = self::fromPath($relative);
+
+                continue;
             }
+
+            $urls[$name] = self::fromPath("{$prefix}/{$name}.{$extFromPath}");
+        }
+
+        if ($urls === [] && $imagePath !== null && $imagePath !== '') {
+            $key = str_contains($imagePath, 'banner') ? 'banner' : 'main';
+            $urls[$key] = self::fromPath($imagePath);
         }
 
         return $urls === [] ? null : $urls;

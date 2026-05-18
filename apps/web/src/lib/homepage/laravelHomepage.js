@@ -1,13 +1,9 @@
-import { resolveApiV1Base } from '@/lib/catalog/config.js';
-import { fetchCatalogJson } from '@/lib/catalog/catalogHttp.js';
-
-function v1Url(path) {
-  return `${resolveApiV1Base()}${path}`;
-}
+import { PUBLIC_PATHS } from '@/lib/api/endpoints.js';
+import { getPublicJson } from '@/lib/api/publicClient.js';
 
 /** @returns {Promise<{ hero_slides: unknown[], banners: unknown[] }>} */
 export async function fetchHomepage() {
-  const data = await fetchCatalogJson(v1Url('/homepage'));
+  const data = await getPublicJson(PUBLIC_PATHS.homepage);
   const unwrap = (value) => (Array.isArray(value) ? value : value?.data ?? []);
 
   return {

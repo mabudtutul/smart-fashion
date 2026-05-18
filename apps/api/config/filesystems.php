@@ -20,7 +20,7 @@ return [
         */
         'uploads' => [
             'driver' => 'local',
-            'root' => public_path('uploads'),
+            'root' => env('UPLOADS_ROOT') ?: public_path('uploads'),
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/uploads',
             'visibility' => 'public',
             'throw' => false,

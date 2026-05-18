@@ -42,10 +42,11 @@ export const laravelAdminCatalog = {
     return adminAuthorizedJson(adminApiUrl(`/categories/${encodeURIComponent(id)}`));
   },
 
-  createProduct(payload) {
+  createProduct(payload, options = {}) {
     return adminAuthorizedJson(adminApiUrl('/products'), {
       method: 'POST',
       body: JSON.stringify(payload),
+      idempotencyKey: options.idempotencyKey,
     });
   },
 
@@ -62,10 +63,11 @@ export const laravelAdminCatalog = {
     });
   },
 
-  createCategory(payload) {
+  createCategory(payload, options = {}) {
     return adminAuthorizedJson(adminApiUrl('/categories'), {
       method: 'POST',
       body: JSON.stringify(payload),
+      idempotencyKey: options.idempotencyKey,
     });
   },
 
