@@ -13,12 +13,4 @@ export function isLaravelAdminMedia() {
   return getAdminMediaDriver() === 'laravel';
 }
 
-export function resolveAdminApiBaseUrl() {
-  const base = (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/+$/, '');
-  if (!base) {
-    throw new Error(
-      'VITE_API_BASE_URL is required when VITE_ADMIN_MEDIA_DRIVER=laravel.'
-    );
-  }
-  return base;
-}
+export { resolveApiBaseUrl as resolveAdminApiBaseUrl, resolveApiV1Base } from '@/lib/catalog/config.js';

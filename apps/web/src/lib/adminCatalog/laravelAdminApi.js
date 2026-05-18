@@ -1,18 +1,13 @@
+import { ADMIN_JSON_TIMEOUT_MS, fetchWithTimeout, parseApiErrorMessage } from '@/lib/adminHttp.js';
 import { getLaravelAdminToken } from '@/lib/adminMedia/laravelAdminMedia.js';
-import { resolveApiBaseUrl } from '@/lib/catalog/config.js';
+import { resolveApiV1Base } from '@/lib/catalog/config.js';
 
 export function adminApiUrl(path) {
-  const base = resolveApiBaseUrl();
-  return new URL(`/api/v1/admin${path}`, `${base}/`).toString();
+  return new URL(`/admin${path}`, `${resolveApiV1Base()}/`).toString();
 }
 
-export function messageFromApiBody(data, fallback = 'Request failed.') {
-  if (data?.errors && typeof data.errors === 'object') {
-    const first = Object.values(data.errors).flat().find(Boolean);
-    if (first) return String(first);
-  }
-  if (data?.message) return String(data.message);
-  return fallback;
+export function messageFromApiBody(data, fallback = 'Request failed.', status = 0) {
+  return parseApiErrorMessage(data, status, fallback);
 }
 
 export async function adminAuthorizedJson(url, options = {}) {
@@ -21,15 +16,25 @@ export async function adminAuthorizedJson(url, options = {}) {
     throw new Error('Laravel admin token missing. Log out and log in again.');
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...(options.headers || {}),
+  const { idempotencyKey, headers: extraHeaders, ...fetchOptions } = options;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+    ...(extraHeaders || {}),
+  };
+  if (idempotencyKey) {
+    headers['Idempotency-Key'] = idempotencyKey;
+  }
+
+  const response = await fetchWithTimeout(
+    url,
+    {
+      ...fetchOptions,
+      headers,
     },
-  });
+    ADMIN_JSON_TIMEOUT_MS
+  );
 
   const text = await response.text();
   const trimmed = text.trim();
@@ -56,7 +61,9 @@ export async function adminAuthorizedJson(url, options = {}) {
   }
 
   if (!response.ok) {
-    const error = new Error(messageFromApiBody(data, `Request failed (${response.status}).`));
+    const error = new Error(
+      messageFromApiBody(data, `Request failed (${response.status}).`, response.status)
+    );
     error.status = response.status;
     error.data = data;
     throw error;

@@ -1,9 +1,8 @@
-import { resolveApiBaseUrl } from '@/lib/catalog/config.js';
+import { resolveApiV1Base } from '@/lib/catalog/config.js';
 import { fetchCatalogJson, normalizeListPayload } from '@/lib/catalog/catalogHttp.js';
 
 function v1Url(path, query = {}) {
-  const base = resolveApiBaseUrl();
-  const url = new URL(`/api/v1${path}`, `${base}/`);
+  const url = new URL(path, `${resolveApiV1Base()}/`);
   Object.entries(query).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       url.searchParams.set(key, String(value));

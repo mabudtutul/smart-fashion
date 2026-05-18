@@ -7,6 +7,7 @@ import {
 import {
   LARAVEL_ADMIN_TOKEN_KEY,
   resolveAdminApiBaseUrl,
+  resolveApiV1Base,
 } from '@/lib/adminMedia/config.js';
 import {
   cacheLaravelMediaMeta,
@@ -14,7 +15,7 @@ import {
 } from '@/lib/adminMedia/mediaCache.js';
 
 function apiUrl(path) {
-  return `${resolveAdminApiBaseUrl()}/api/v1${path}`;
+  return `${resolveApiV1Base()}${path}`;
 }
 
 export function getLaravelAdminToken() {
