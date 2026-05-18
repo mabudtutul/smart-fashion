@@ -25,8 +25,21 @@ export function applyLaravelMediaCache(items) {
   return items.map((item) => {
     const meta = cache[item.id];
     if (!meta) return item;
-    return { ...item, ...meta };
+    return {
+      ...item,
+      image: item.image || meta.image || '',
+      image_url: item.image_url ?? meta.image_url ?? null,
+      image_urls: item.image_urls ?? meta.image_urls ?? null,
+    };
   });
+}
+
+export function clearLaravelMediaMeta(id) {
+  if (!id) return;
+  const cache = readCache();
+  if (!cache[id]) return;
+  delete cache[id];
+  localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
 }
 
 export function clearLaravelMediaCache() {

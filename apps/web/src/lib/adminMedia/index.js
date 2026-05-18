@@ -1,6 +1,8 @@
 import { isLaravelAdminCatalog } from '@/lib/adminCatalog/config.js';
 import { isLaravelAdminMedia } from '@/lib/adminMedia/config.js';
 import {
+  deleteCategoryImage,
+  deleteProductImage,
   loginLaravelAdmin,
   setLaravelAdminToken,
   syncCategoryToLaravel,
@@ -26,7 +28,7 @@ export async function ensureLaravelMediaAuth(email, password) {
   await loginLaravelAdmin(email, password);
 }
 
-export async function afterProductSaved(record, imageFile, options) {
+export async function afterProductSaved(record, imageFile, options = {}) {
   if (!isLaravelAdminMedia()) return record;
 
   if (!isLaravelAdminCatalog()) {
@@ -34,14 +36,24 @@ export async function afterProductSaved(record, imageFile, options) {
   }
 
   if (imageFile) {
-    const result = await uploadProductImage(record.id, imageFile, options);
+    const result = await uploadProductImage(record.id, imageFile, {
+      ...options,
+      idempotencyKey: options.idempotencyKey
+        ? `${options.idempotencyKey}:image`
+        : undefined,
+    });
+    return result?.record ?? record;
+  }
+
+  if (options.removeImage) {
+    const result = await deleteProductImage(record.id);
     return result?.record ?? record;
   }
 
   return record;
 }
 
-export async function afterCategorySaved(record, imageFile, options) {
+export async function afterCategorySaved(record, imageFile, options = {}) {
   if (!isLaravelAdminMedia()) return record;
 
   if (!isLaravelAdminCatalog()) {
@@ -49,7 +61,17 @@ export async function afterCategorySaved(record, imageFile, options) {
   }
 
   if (imageFile) {
-    const result = await uploadCategoryImage(record.id, imageFile, options);
+    const result = await uploadCategoryImage(record.id, imageFile, {
+      ...options,
+      idempotencyKey: options.idempotencyKey
+        ? `${options.idempotencyKey}:image`
+        : undefined,
+    });
+    return result?.record ?? record;
+  }
+
+  if (options.removeImage) {
+    const result = await deleteCategoryImage(record.id);
     return result?.record ?? record;
   }
 
